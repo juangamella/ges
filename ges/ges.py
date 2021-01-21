@@ -29,6 +29,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 """
+The module containing the implementation of GES, including
+the logic for the insert, delete and turn operators.
 """
 
 import numpy as np
@@ -38,6 +40,10 @@ import ges.utils as utils
 # TODO: ASSUME DATA IS CENTERED
 # TODO: Raise exception if x or y are contained in H or T
 # TODO: If condition 1 does not pass for an operator, do not check condition 2
+# TODO: Update research utils with new changes
+# TODO: Rubber duck turning logic and semi_directed_paths
+# TODO: Write README & requirements
+# TODO: Finish documenting all functions
 
 def fit(cache, A0, phases = ['forward', 'backward', 'turning'], iterate=False, debug=0):
     # Select the desired phases
@@ -369,7 +375,6 @@ def score_valid_insert_operators(x,y,A,cache,debug=0):
             # contain T, as the clique condition will also not hold
             supersets = subsets[:,T].all(axis=1)
             subsets = np.delete(subsets, supersets, axis=0)
-            continue
         # Condition 2: Test that all semi-directed paths from y to x contain a
         # member from NA_yx U T
         if passed_cond_2:
@@ -386,18 +391,17 @@ def score_valid_insert_operators(x,y,A,cache,debug=0):
                 # If condition 2 holds for NA_yx U T, then it holds for all supersets of T
                 supersets = subsets[:,T].all(axis=1)
                 subsets[supersets,-1] = True
-        # If both conditions hold, apply operator and compute its score
         print("      insert(%d,%d,%s)"%(x,y,T), "na_yx U T = ", na_yxT, "validity:", cond_1, cond_2) if debug>1 else None
-        if cond_2:
-            # At this point the operator satisfies both conditions
-            #   Apply operator
+        # If both conditions hold, apply operator and compute its score
+        if cond_1 and cond_2:
+            # Apply operator
             new_A = insert(x,y,T,A)
-            #   Compute the change in score
+            # Compute the change in score
             aux = na_yxT | utils.pa(y, A)
             old_score = cache.local_score(y, aux)
             new_score = cache.local_score(y, aux | {x})
             print("        new: s(%d, %s) = %0.6f old: s(%d, %s) = %0.6f" % (y, aux | {x}, new_score, y, aux, old_score)) if debug>1 else None
-            #   Add to the list of valid operators
+            # Add to the list of valid operators
             valid_operators.append((new_score - old_score, new_A, x, y, T))
             print("    insert(%d,%d,%s) -> %0.16f" % (x,y,T,new_score - old_score)) if debug else None
     # Return all the valid operators

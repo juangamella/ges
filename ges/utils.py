@@ -28,7 +28,8 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""Module containing the auxiliary functions used in the
+"""
+Module containing the auxiliary functions used in the
 implementation of GES, including the PDAG to CPDAG conversion
 algorithm described in Chickering's original GES paper from 2002.
 """
@@ -243,6 +244,9 @@ def semi_directed_paths(fro,to,A):
     # stack size limit
     stack = [(fro,[],list(ch(fro,A) | neighbors(fro,A)))]
     paths = []
+    # Precompute the nodes that are accessible from each node for a
+    # significant increase in speed
+    accessible = dict((i,ch(i,A) | neighbors(i,A)) for i in range(len(A)))
     while len(stack) > 0:
         current_node, visited, to_visit = stack[0]
         if current_node == to:
@@ -252,8 +256,8 @@ def semi_directed_paths(fro,to,A):
             stack = stack[1:]
         else:
             next_node = to_visit.pop()
-            accessible = list(ch(next_node,A) | neighbors(next_node,A) - set(visited) - {current_node})
-            stack = [(next_node, visited + [current_node], accessible)] + stack    
+            next_to_visit = list(accessible[next_node] - set(visited) - {current_node})
+            stack = [(next_node, visited + [current_node], next_to_visit)] + stack
     return paths
 
 def separates(S,A,B,G):

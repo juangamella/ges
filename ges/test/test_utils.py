@@ -35,6 +35,8 @@ Tests for the research.utils module
 import unittest
 import numpy as np
 import sempler
+import itertools
+import networkx as nx
 
 import ges.utils
 
@@ -253,7 +255,7 @@ class UtilsTests(unittest.TestCase):
         # |S| = 4
         self.assertFalse(ges.utils.is_clique({0,1,2,3}, A))
 
-    def test_semi_directed_paths(self):
+    def test_semi_directed_paths_1(self):
         A = np.array([[0,1,1,0],
                       [0,0,1,0],
                       [0,1,0,1],
@@ -312,6 +314,25 @@ class UtilsTests(unittest.TestCase):
         self.assertEqual(1, len(paths))
         self.assertTrue([3,2] in paths)
 
+    def test_semi_directed_paths_2(self):
+        # Test vs. networkx implementation
+        G = 200
+        p = 10
+        for i in range(G):
+            A = sempler.dag_avg_deg(p,3,1,1)
+            cpdag = ges.utils.pdag_to_cpdag(A)
+            G = nx.from_numpy_matrix(cpdag, create_using=nx.DiGraph)
+            for (x,y) in itertools.combinations(range(p),2):
+                # From x to y
+                paths_own = ges.utils.semi_directed_paths(x,y,cpdag)
+                paths_nx = list(nx.algorithms.all_simple_paths(G,x,y))
+                self.assertEqual(sorted(paths_nx), sorted(paths_own))
+                # From y to x
+                paths_own = ges.utils.semi_directed_paths(y,x,cpdag)
+                paths_nx = list(nx.algorithms.all_simple_paths(G,y,x))
+                self.assertEqual(sorted(paths_nx), sorted(paths_own))
+        print("Checked path enumeration for %d PDAGs" % (i+1))
+        
     def test_skeleton(self):
         # Test utils.skeleton
         skeleton = np.array([[0,1,1,0],

@@ -96,7 +96,7 @@ class OverallGESTests(unittest.TestCase):
 
     def test_vs_cdt(self):
         np.random.seed(12)
-        G = 1
+        G = 500
         p = 15
         n = 1500
         for i in range(G):

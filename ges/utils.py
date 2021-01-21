@@ -32,7 +32,6 @@
 """
 
 import numpy as np
-import networkx as nx
 from functools import reduce
 import itertools
 
@@ -128,11 +127,43 @@ def topological_ordering(A):
         raise ValueError("The given graph is not a DAG")
     else:
         return ordering
+
+def semi_directed_paths(fro,to,A):
+    """Return all paths from i to j in A. Note: a path is a sequence
+    (a_1,...,a_n) of non-repeating nodes where either a_i -> a_i+1 or
+    a_i - a_i+1 are edges in the PDAG A.
+
+    Parameters
+    ----------
+    fro : int
+        the index of the starting node
+    to : int
+        the index of the target node
+    A : np.array
+        the adjacency matrix of the graph, where A[i,j] != 0 => i -> j.
+
+    Returns
+    -------
+    paths : list of lists
+        all the paths between the two nodes
     
-def semi_directed_paths(i,j,A):
-    """Return all semi-directed paths from i to j in A"""
-    G = nx.from_numpy_matrix(A, create_using=nx.DiGraph)
-    return list(nx.algorithms.all_simple_paths(G,i,j))
+    """
+    # NOTE: Implemented non-recursively to avoid issues with Python's
+    # stack size limit
+    stack = [(fro,[],list(ch(fro,A) | neighbors(fro,A)))]
+    paths = []
+    while len(stack) > 0:
+        current_node, visited, to_visit = stack[0]
+        if current_node == to:
+            paths.append(visited + [current_node])
+            stack = stack[1:]
+        elif to_visit == []:
+            stack = stack[1:]
+        else:
+            next_node = to_visit.pop()
+            accessible = list(ch(next_node,A) | neighbors(next_node,A) - set(visited) - {current_node})
+            stack = [(next_node, visited + [current_node], accessible)] + stack    
+    return paths
 
 def separates(S,A,B,G):
     """Returns true if the set S separates A from B in G, i.e. if all

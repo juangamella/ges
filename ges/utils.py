@@ -32,10 +32,13 @@
 """
 
 import numpy as np
-import research.utils as utils
+import networkx as nx
 from functools import reduce
+import itertools
 
-# Graph definitions for PDAGS
+# --------------------------------------------------------------------
+# Graph functions for PDAGS
+
 def na(y,x,A):
     """All neighbors of y which are adjacent to x in A"""
     return neighbors(y,A) & adj(x,A)
@@ -66,6 +69,19 @@ def is_clique(S, A):
     no_edges = np.sum(subgraph != 0)
     n = len(S)
     return no_edges == n * (n-1)
+
+def is_dag(B):
+    """Returns True if B is the connectivity matrix of a DAG, False
+    otherwise"""
+    # Note networkx takes B[i,j] = 1 => i -> j
+    G = nx.from_numpy_matrix(B, create_using = nx.DiGraph)
+    return nx.is_directed_acyclic_graph(G)
+
+def topological_ordering(A):
+    """Return a topological ordering for the DAG with adjacency matrix A"""
+    # Note networkx takes A[i,j] = 1 => i -> j
+    G = nx.from_numpy_matrix(A, create_using = nx.DiGraph)
+    return list(nx.algorithms.dag.topological_sort(G))
 
 def semi_directed_paths(i,j,A):
     """Return all semi-directed paths from i to j in A"""
@@ -300,43 +316,13 @@ def is_consistent_extension(G,P,debug=False):
         print("orientation (%s) (P,G): " % same_orientation, P, G)
     return same_vstructures and same_orientation and same_skeleton
 
-def sort(L, order=None):
-    """Sort the elements in an iterable according to its 'sorted'
-    function, or according to a given order: i will precede j if i precedes
-    j in the order.
-
-    Parameters
-    ----------
-    L : iterable
-        the iterable to be sorted
-    order : iterable or None
-        a given ordering. In the sorted result, i will precede j if i
-        precedes j in order. If None, i will precede j if i < j
-
-    Returns
-    -------
-    ordered : list
-        a list containing the elements of L, sorted from lesser to
-        greater or according to the given order
-
-    """
-    L = list(L)
-    if order is None:
-        return sorted(L)
-    else:
-        order = list(order)
-        pos = np.zeros(len(order), dtype=int)
-        pos[order] = range(len(order))
-        positions = [pos[l] for l in L]
-        return [tup[1] for tup in sorted(zip(positions, L))]
-
 # --------------------------------------------------------------------
 # Functions for PDAG to CPDAG conversion
 
     # The following functions implement the conversion from PDAG to
     # CPDAG that is carried after each transition to a different
     # equivalence class, after the selection and application of the
-    # highest scoring insert/delete operator. It consists in the
+    # highest scoring insert/delete/turn operator. It consists of the
     # succesive application of three algorithms, all described in
     # Appendix C (pages 552,553) of Chickering's 2002 GES paper
     # (www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf).
@@ -360,7 +346,7 @@ def sort(L, order=None):
     # NOTE!!!: Algorithm (1) is from the 1992 paper "A simple
     # algorithm to construct a consistent extension of a partially
     # oriented graph" by Dorit Dor and Michael Tarsi. There is an
-    # ERROR in the summarized version in the Chickering paper. In
+    # ERROR in the summarized version in Chickering's paper. In
     # particular, the condition that N_x U Pa_x is a clique is not
     # equivalent to the condition from Dor & Torsi that every neighbor
     # of X should be adjacent to all of X's adjacent nodes. The
@@ -370,6 +356,7 @@ def sort(L, order=None):
     # uncovered during exhaustive testing.
 
 # The complete pipeline: pdag -> dag -> ordered -> labelled -> cpdag
+
 def pdag_to_cpdag(pdag):
     """
     Transform a PDAG into its corresponding CPDAG. Returns a ValueError
@@ -444,7 +431,7 @@ def pdag_to_dag(P, debug=False):
         (i.e. same v-structures and skeleton) of P.
 
     """
-    G = utils.only_directed(P)
+    G = only_directed(P)
     indexes = list(range(len(P))) # To keep track of the real variable
                                   # indexes as we remove nodes from P
     while P.size > 0:
@@ -457,12 +444,12 @@ def pdag_to_dag(P, debug=False):
         i = 0
         while not found and i < len(P):
             # Check condition 1
-            sink = len(utils.ch(i,P)) == 0
+            sink = len(ch(i,P)) == 0
             # Check condition 2
-            n_i = utils.neighbors(i,P)
-            adj_i = utils.adj(i,P)
-            adj_neighbors = np.all([adj_i - {y} <= utils.adj(y,P) for y in n_i])
-            print("   i:",i,": n=",n_i,"adj=",adj_i,"ch=",utils.ch(i,P)) if debug else None
+            n_i = neighbors(i,P)
+            adj_i = adj(i,P)
+            adj_neighbors = np.all([adj_i - {y} <= adj(y,P) for y in n_i])
+            print("   i:",i,": n=",n_i,"adj=",adj_i,"ch=",ch(i,P)) if debug else None
             found = sink and adj_neighbors
             # If found, orient all incident undirected edges and
             # remove i from the subgraph
@@ -504,10 +491,10 @@ def order_edges(G):
        i.e. i -> j is has label x iff ordered[i,j] = x.
 
     """
-    if not utils.is_dag(G):
+    if not is_dag(G):
         raise ValueError("The given graph is not a DAG")
     # i.e. if i -> j, then i appears before j in order
-    order = utils.topological_ordering(G)
+    order = topological_ordering(G)
     # You can check the above by seeing that np.all([i == order[pos[i]] for i in range(p)]) is True
     # Unlabelled edges as marked with -1
     ordered = (G != 0).astype(int) * -1
@@ -517,11 +504,11 @@ def order_edges(G):
         # incident to it
         froms, tos = np.where(ordered == -1)
         with_unlabelled = np.unique(np.hstack((froms,tos)))
-        y = utils.sort(with_unlabelled, reversed(order))[0]
+        y = sort(with_unlabelled, reversed(order))[0]
         # let x be the highest ordered node s.t. the edge x -> y
         # exists and is unlabelled
         unlabelled_parents_y = np.where(ordered[:,y] == -1)[0]
-        x = utils.sort(unlabelled_parents_y, order)[0]
+        x = sort(unlabelled_parents_y, order)[0]
         ordered[x,y] = i
         i += 1
     return ordered
@@ -545,7 +532,7 @@ def label_edges(ordered):
 
     """
     # Validate the input
-    if not utils.is_dag(ordered):
+    if not is_dag(ordered):
         raise ValueError("The given graph is not a DAG")
     no_edges = (ordered != 0).sum()
     if sorted(ordered[ordered != 0]) != list(range(1,no_edges+1)):
@@ -571,7 +558,7 @@ def label_edges(ordered):
             # if w is not a parent of y, label all edges into y as
             # compelled, and finish this pass
             if labelled[w,y] == 0:
-                labelled[list(utils.pa(y, labelled)), y] = COM
+                labelled[list(pa(y, labelled)), y] = COM
                 end = True
                 break
             # otherwise, label w -> y as compelled
@@ -582,89 +569,121 @@ def label_edges(ordered):
             # not a parent of x, label all unknown edges (this
             # includes x -> y) into y with compelled; label with
             # reversible otherwise.
-            z_exists = len(utils.pa(y, labelled) - {x} - utils.pa(x,labelled)) > 0
+            z_exists = len(pa(y, labelled) - {x} - pa(x,labelled)) > 0
             unknown = np.where(labelled[:,y] == UNK)[0]
             assert x in unknown
             labelled[unknown, y] = COM if z_exists else REV
     return labelled
 
 # --------------------------------------------------------------------
-# Functions DAG to I-CPDAG conversion
-# TODO: test and commend
+# General utilities
 
-# Meek rules
-
-def rule_1(i,j,A):
-    # If there is at least one parent of i which is not adjacent to j, orient the edge i->j
-    if len(utils.pa(i,A)) > 0 and not utils.pa(i,A) <= utils.adj(j,A):
-        return True
-    else:
-        return False
-
-def rule_2(i,j,A):
-    # If there is a path i -> k -> j, then orient i ->j
-    return len(utils.ch(i,A) & utils.pa(j,A)) > 0
-    
-def rule_3(i,j,A):
-    # If i is a neighbor of at least two parents of j, then orient i -> j
-    return len(utils.neighbors(i,A) & utils.pa(j,A)) > 1
-    
-def rule_4(i,j,A):
-    pa_j = utils.pa(j,A)
-    n_i = utils.neighbors(i,A)
-    # if i is a neighbor of a parent of j, and a neighbor of a parent of said parent, orient i->j
-    if len(pa_j & n_i) > 0:
-        ancestors = set(reduce(lambda acc,pa: acc | utils.pa(pa,A), pa_j & n_i, set()))
-        return len(ancestors & n_i) > 0
-    else:
-        return False
-
-def maximally_orient(P):
-    """Maximally orient the PDAG P by successive application of the meek
-    rules (see functions rule_{1,2,3,4})
+# Very fast way to generate a cartesian product of input arrays
+def cartesian(arrays, out=None, dtype=np.byte):
+    """
+    Generate a cartesian product of input arrays.
 
     Parameters
     ----------
-    P : np.array
-        adjacency matrix of a PDAG
+    arrays : list of array-like
+        1-D arrays to form the cartesian product of.
+    out : ndarray
+        Array to place the cartesian product in.
 
     Returns
     -------
-    maximally_oriented : np.array
-        the maximally oriented PDAG
-    
+    out : ndarray
+        2-D array of shape (M, len(arrays)) containing cartesian products
+        formed of input arrays.
+
+    Examples
+    --------
+    >>> cartesian(([1, 2, 3], [4, 5], [6, 7]))
+    array([[1, 4, 6],
+           [1, 4, 7],
+           [1, 5, 6],
+           [1, 5, 7],
+           [2, 4, 6],
+           [2, 4, 7],
+           [2, 5, 6],
+           [2, 5, 7],
+           [3, 4, 6],
+           [3, 4, 7],
+           [3, 5, 6],
+           [3, 5, 7]])
+
     """
-    # Ensure that the given PDAG does admit a consistent extension
-    try:
-        pdag_to_dag(P)
-    except ValueError as e:
-        raise e
-    P = P.copy()
-    fro,to = np.where(utils.only_undirected(P))
-    undirected_edges = filter(lambda e: e[0] > e[1], zip(fro,to))
-    for (i,j) in undirected_edges:
-        if rule_1(i,j,P) or rule_2(i,j,P) or rule_3(i,j,P) or rule_4(i,j,P):
-            # orient i -> j
-            P[j,i] = 0
-        elif rule_1(j,i,P) or rule_2(j,i,P) or rule_3(j,i,P) or rule_4(j,i,P):
-            # orient j -> i
-            P[i,j] = 0
-    return P
 
-def pdag_to_imec(P, I):
-    P = P.copy()
-    # Orient undirected edges away
-    for i in I:
-        for j in range(len(P)):
-            if P[i,j] != 0 and P[j,i] != 0:
-                P[i,j] = 0
-    G = pdag_to_dag(P)
-    return dag_to_imec(G, I)
+    arrays = [np.asarray(x) for x in arrays]
+    #dtype = arrays[0].dtype
 
-def dag_to_imec(G, I):
-    P = dag_to_cpdag(G)
-    for i in I:
-        P[:,i] = G[:,i]
-        P[i,:] = G[i,:]
-    return maximally_orient(P)
-        
+    n = np.prod([x.size for x in arrays])
+    if out is None:
+        out = np.zeros([n, len(arrays)], dtype=dtype)
+
+    m = int(n / arrays[0].size)
+    out[:,0] = np.repeat(arrays[0], m)
+    if arrays[1:]:
+        cartesian(arrays[1:], out=out[0:m,1:])
+        for j in range(1, arrays[0].size):
+            out[j*m:(j+1)*m,1:] = out[0:m,1:]
+    return out
+
+def sort(L, order=None):
+    """Sort the elements in an iterable according to its 'sorted'
+    function, or according to a given order: i will precede j if i precedes
+    j in the order.
+
+    Parameters
+    ----------
+    L : iterable
+        the iterable to be sorted
+    order : iterable or None
+        a given ordering. In the sorted result, i will precede j if i
+        precedes j in order. If None, i will precede j if i < j
+
+    Returns
+    -------
+    ordered : list
+        a list containing the elements of L, sorted from lesser to
+        greater or according to the given order
+
+    """
+    L = list(L)
+    if order is None:
+        return sorted(L)
+    else:
+        order = list(order)
+        pos = np.zeros(len(order), dtype=int)
+        pos[order] = range(len(order))
+        positions = [pos[l] for l in L]
+        return [tup[1] for tup in sorted(zip(positions, L))]
+
+def subsets(S):
+    """
+    Return an iterator with all possible subsets of the set S.
+
+    Parameters
+    ----------
+    S : set
+        a given set
+
+    Returns
+    -------
+    subsets : iterable
+        an iterable over the subsets of S, in increasing size
+
+    """
+    subsets = []
+    for r in range(len(S)+1):
+        subsets += [set(ss) for ss in itertools.combinations(S, r)]
+    return subsets
+
+def member(L, A):
+    """Return the index of the first appearance of array A in list
+    L. Returns None if A is not in L.
+    """
+    for i,B in enumerate(L):
+        if (A==B).all():
+            return i
+    return None

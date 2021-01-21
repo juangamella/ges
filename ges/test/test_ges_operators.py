@@ -34,10 +34,8 @@
 import unittest
 import numpy as np
 import sempler
-import research.utils as utils
-import causaldag as cd # to obtain cpdag from dag
 
-import ges.utils
+import ges.utils as utils
 import ges.ges
 from ges.scores.gauss_obs_l0_pen import GaussObsL0Pen
 
@@ -115,7 +113,7 @@ class InsertOperatorTests(unittest.TestCase):
         p = 20
         for i in range(G):
             A = sempler.dag_avg_deg(p,3,1,1)
-            cpdag = cd.DAG.from_amat(A).cpdag().to_amat()[0]
+            cpdag = utils.dag_to_cpdag(A)
             for x in range(p):
                 # Can only apply the operator to non-adjacent nodes
                 adj_x = utils.adj(x,cpdag)
@@ -497,7 +495,7 @@ class DeleteOperatorTests(unittest.TestCase):
         p = 20
         for i in range(G):
             A = sempler.dag_avg_deg(p,3,1,1)
-            cpdag = cd.DAG.from_amat(A).cpdag().to_amat()[0]
+            cpdag = utils.dag_to_cpdag(A)
             for x in range(p):
                 # Can only apply the operator to X -> Y or X - Y
                 for y in np.where(cpdag[x,:] != 0)[0]:
@@ -599,7 +597,7 @@ class DeleteOperatorTests(unittest.TestCase):
         p = 20
         for i in range(G):
             A = sempler.dag_avg_deg(p,3,1,1)
-            cpdag = cd.DAG.from_amat(A).cpdag().to_amat()[0]
+            cpdag = utils.dag_to_cpdag(A)
             W = A * np.random.uniform(1,2,A.shape)
             obs_sample = sempler.LGANM(W, (0.5,1)).sample(n=1000)
             cache = GaussObsL0Pen(obs_sample)
@@ -976,7 +974,7 @@ class TurnOperatorTests(unittest.TestCase):
         p = 20
         for i in range(G):
             A = sempler.dag_avg_deg(p,3,1,1)
-            cpdag = cd.DAG.from_amat(A).cpdag().to_amat()[0]
+            cpdag = utils.dag_to_cpdag(A)
             W = A * np.random.uniform(1,2,A.shape)
             obs_sample = sempler.LGANM(W, (0.5,1)).sample(n=1000)
             cache = GaussObsL0Pen(obs_sample)

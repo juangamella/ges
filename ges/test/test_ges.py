@@ -34,18 +34,17 @@
 import unittest
 import numpy as np
 import sempler
-import research.utils as utils
+import ges.utils as utils
 import time
 
-from ges.ges import fit
+import ges
 import ges.scores.gauss_obs_l0_pen
-import ges.scores.gauss_int_l0_pen
 
 # For CDT
 import cdt
 from cdt.causality.graph import GES
-import pandas as pd
 import networkx as nx
+import pandas as pd
 
 #---------------------------------------------------------------------
 class OverallGESTests(unittest.TestCase):
@@ -97,7 +96,7 @@ class OverallGESTests(unittest.TestCase):
 
     def test_vs_cdt(self):
         np.random.seed(12)
-        G = 500
+        G = 1
         p = 15
         n = 1500
         for i in range(G):
@@ -116,37 +115,10 @@ class OverallGESTests(unittest.TestCase):
             print("    GES-CDT done (%0.2f seconds)" % (end - start))
             start = time.time()
             # Estimate using this implementation
-            estimate, _ = fit(score_class,
+            estimate, _ = ges.fit(score_class,
                               np.zeros_like(W), debug=4 if i < 2 else 2) # Test debugging output for the first 2 SCMs
             end = time.time()
             print("    GES-own done (%0.2f seconds)" % (end - start))
             self.assertTrue((estimate == estimate_cdt).all())
         print("\nCompared with PCALG implementation on %d DAGs" % (i+1))  
 
-    # def test_vs_cdt_int(self):
-    #     np.random.seed(12)
-    #     G = 50
-    #     p = 5
-    #     n = 1500
-    #     for i in range(G):
-    #         print("  Checking SCM %d" % (i))
-    #         start = time.time()
-    #         A = sempler.dag_avg_deg(p,3,1,1)
-    #         W = A * np.random.uniform(1,2,A.shape)
-    #         obs_sample = sempler.LGANM(W, (0.5,1), (1,10)).sample(n=n)
-    #         # Estimate the equivalence class using the pcalg
-    #         # implementation of GES (package cdt)
-    #         data = pd.DataFrame(obs_sample)
-    #         score_class = ges.scores.gauss_int_l0_pen.GaussIntL0Pen([obs_sample])
-    #         output = GES(verbose=True).predict(data)
-    #         estimate_cdt = nx.to_numpy_array(output)
-    #         end = time.time()
-    #         print("    GES-CDT done (%0.2f seconds)" % (end - start))
-    #         start = time.time()
-    #         # Estimate using this implementation
-    #         estimate, _ = fit(score_class,
-    #                           np.zeros_like(W), debug=2)
-    #         end = time.time()
-    #         print("    GES-own done (%0.2f seconds)" % (end - start))
-    #         self.assertTrue((estimate == estimate_cdt).all())
-    #     print("\nCompared with PCALG implementation on %d DAGs" % (i+1))      

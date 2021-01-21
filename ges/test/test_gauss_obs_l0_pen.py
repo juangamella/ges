@@ -34,10 +34,8 @@
 import unittest
 import numpy as np
 import sempler
-import research.utils as utils
+import ges.utils as utils
 
-import ges.scores.log_likelihood as log_likelihood
-from ges.scores.gauss_int_l0_pen import GaussIntL0Pen
 from ges.scores.gauss_obs_l0_pen import GaussObsL0Pen
 
 #---------------------------------------------------------------------

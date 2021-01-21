@@ -34,7 +34,7 @@
 import unittest
 import numpy as np
 import sempler
-import research.utils as utils
+import ges.utils as utils
 import causaldag as cd # to obtain cpdag from dag
 
 import ges.utils
@@ -111,7 +111,7 @@ class PDAG_to_CPDAG_Tests(unittest.TestCase):
         p = 20
         for i in range(G):
             A = sempler.dag_avg_deg(p,3,1,1)
-            cpdag = cd.DAG.from_amat(A).cpdag().to_amat()[0]
+            cpdag = utils.dag_to_cpdag(A)
             self.assertTrue(utils.is_consistent_extension(A, cpdag))
             extension = ges.utils.pdag_to_dag(cpdag, debug=False)
             is_consistent_extension = utils.is_consistent_extension(extension, cpdag)
@@ -238,7 +238,7 @@ class PDAG_to_CPDAG_Tests(unittest.TestCase):
         for i in range(G):
             A = sempler.dag_avg_deg(p,3,1,1)
             # Construct expected output
-            cpdag = cd.DAG.from_amat(A).cpdag().to_amat()[0]
+            cpdag = utils.dag_to_cpdag(A)
             undirected = np.logical_and(cpdag, cpdag.T)
             truth = A.copy()
             truth[np.logical_and(truth, undirected)] = -1
@@ -255,7 +255,7 @@ class PDAG_to_CPDAG_Tests(unittest.TestCase):
         p = 25
         for i in range(G):
             A = sempler.dag_avg_deg(p,4,1,1)
-            truth = cd.DAG.from_amat(A).cpdag().to_amat()[0]
+            truth = utils.dag_to_cpdag(A)
             # Run and assert
             cpdag = ges.utils.dag_to_cpdag(A)
             self.assertTrue((truth == cpdag).all())
@@ -268,7 +268,7 @@ class PDAG_to_CPDAG_Tests(unittest.TestCase):
         p = 30
         for i in range(G):
             A = sempler.dag_avg_deg(p,3,1,1)
-            cpdag = cd.DAG.from_amat(A).cpdag().to_amat()[0]
+            cpdag = utils.dag_to_cpdag(A)
             # Run and assert
             output = ges.utils.pdag_to_cpdag(cpdag)
             self.assertTrue((output == cpdag).all())
@@ -299,402 +299,7 @@ class PDAG_to_CPDAG_Tests(unittest.TestCase):
                     pdag[y,x] = 1
             # Run and assert
             self.assertTrue(utils.is_consistent_extension(A,pdag))
-            truth = cd.DAG.from_amat(A).cpdag().to_amat()[0]
+            truth = utils.dag_to_cpdag(A)
             output = ges.utils.pdag_to_cpdag(pdag)
             self.assertTrue((output == truth).all())
         print("\nChecked PDAG to CPDAG conversion for %d PDAGs" % (g+1))
-
-    def test_maximally_orient_1(self):
-        graphs = [
-            # Graph 1 (Meek rule 1)
-            (np.array([[0,1,0],
-                       [0,0,1],
-                       [0,1,0]]),
-             np.array([[0,1,0],
-                       [0,0,1],
-                       [0,0,0]])),
-            # Graph 2 (Meek rule 1)
-            (np.array([[0,1,1,0],
-                       [0,0,1,0],
-                       [0,1,0,0],
-                       [0,0,1,0]]),
-             np.array([[0,1,1,0],
-                       [0,0,0,0],
-                       [0,1,0,0],
-                       [0,0,1,0]])),
-            # Graph 3 (Meek rule 1)
-            (np.array([[0,1,1],
-                       [0,0,1],
-                       [0,1,0]]),
-             np.array([[0,1,1],
-                       [0,0,1],
-                       [0,1,0]])),
-            # Graph 4 (Meek rule 1)
-            (np.array([[0,0,1,0,0],
-                       [0,0,1,0,0],
-                       [0,0,0,1,1],
-                       [0,0,1,0,0],
-                       [0,0,1,0,0]]),
-             np.array([[0,0,1,0,0],
-                       [0,0,1,0,0],
-                       [0,0,0,1,1],
-                       [0,0,0,0,0],
-                       [0,0,0,0,0]])),
-            # Graph 5 (Meek rule 2)
-            (np.array([[0,1,1],
-                       [0,0,1],
-                       [1,0,0]]),
-             np.array([[0,1,1],
-                       [0,0,1],
-                       [0,0,0]])),
-            # Graph 6 (Meek rule 2)
-            (np.array([[0,1,1,1],
-                       [0,0,0,1],
-                       [0,0,0,1],
-                       [1,0,0,0]]),
-             np.array([[0,1,1,1],
-                       [0,0,0,1],
-                       [0,0,0,1],
-                       [0,0,0,0]])),
-            # Graph 7 (Meek rule 2)
-            (np.array([[0,1,1],
-                       [0,0,0],
-                       [1,1,0]]),
-             np.array([[0,1,1],
-                       [0,0,0],
-                       [1,1,0]])),
-            # Graph 8 (No consistent extension)
-            (np.array([[0,1,0,1,0],
-                       [0,0,1,1,0],
-                       [0,0,0,0,1],
-                       [1,0,0,0,1],
-                       [0,0,1,1,0]]),
-              None),
-            # Graph 9 (Meek rule 3)
-            (np.array([[0,1,1,1],
-                       [1,0,0,1],
-                       [1,0,0,1],
-                       [1,0,0,0]]),
-             np.array([[0,1,1,1],
-                       [1,0,0,1],
-                       [1,0,0,1],
-                       [0,0,0,0]])),
-            # Graph 10
-            (np.array([[0,1,1,1],
-                       [1,0,0,1],
-                       [0,0,0,1],
-                       [1,0,0,0]]),
-             np.array([[0,1,1,1],
-                       [1,0,0,1],
-                       [0,0,0,1],
-                       [0,0,0,0]])),
-            # Graph 11 (No consistent extension)
-            (np.array([[0,1,1,1,1,0],
-                       [1,0,0,1,1,0],
-                       [1,0,0,1,1,0],
-                       [1,0,0,0,0,0],
-                       [1,0,0,0,0,0],
-                       [0,0,0,0,1,0]]),
-             None),
-            # Graph 12 (Meek rule 4)
-            (np.array([[0,1,1,0],
-                       [1,0,1,1],
-                       [0,1,0,1],
-                       [0,1,0,0]]),
-             np.array([[0,1,1,0],
-                       [1,0,1,1],
-                       [0,1,0,1],
-                       [0,0,0,0]])),
-            # Graph 13 (Meek rule 4)
-            (np.array([[0,1,0,0,1],
-                       [0,0,1,0,1],
-                       [0,0,0,1,1],
-                       [0,0,0,0,1],
-                       [1,1,1,1,0]]),
-             np.array([[0,1,0,0,1],
-                       [0,0,1,0,1],
-                       [0,0,0,1,0],
-                       [0,0,0,0,0],
-                       [1,1,1,1,0]]))
-
-        ]
-        # Test
-        for (A, truth) in graphs:
-            if truth is None:
-                try:
-                    ges.utils.maximally_orient(A)
-                    self.fail("Exception should have been thrown")
-                except Exception as e:
-                    print("OK:", e)
-            else:
-                self.assertTrue((truth == ges.utils.maximally_orient(A)).all())
-
-    def test_maximally_orient_2(self):
-        G = 500
-        p = 30
-        for k in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
-            pdag = ges.utils.pdag_to_cpdag(A)
-            fro,to = np.where(utils.only_undirected(pdag) != 0)
-            if len(fro) == 0:
-                continue
-            orient = np.random.choice(len(fro), np.random.randint(0,len(fro)))
-            for idx in orient:
-                i,j = fro[idx], to[idx]
-                if np.random.binomial(1,0.5):
-                    pdag[i,j] = 0
-                else:
-                    pdag[i,j] = 0
-            # Result from succesively applying meek rules should have
-            # the same skeleton, v-structures and respect existing
-            # edge orientations
-            try:
-                oriented = ges.utils.maximally_orient(pdag)
-                self.assertTrue(utils.is_consistent_extension(oriented, pdag))
-            except ValueError:
-                pass
-        print("\nChecked meek rule orientation for %d PDAGs" % (k+1))
-
-                
-    def test_meek_rule_1_a(self):
-        A = np.array([[0,1,0],
-                      [0,0,1],
-                      [0,1,0]])
-        self.assertTrue(ges.utils.rule_1(1,2,A))
-        self.assertFalse(ges.utils.rule_1(2,1,A))
-        # Other rules should not orient the edge
-        self.assertFalse(ges.utils.rule_2(1,2,A))
-        self.assertFalse(ges.utils.rule_2(2,1,A))
-        self.assertFalse(ges.utils.rule_3(1,2,A))
-        self.assertFalse(ges.utils.rule_3(2,1,A))
-        self.assertFalse(ges.utils.rule_4(1,2,A))
-        self.assertFalse(ges.utils.rule_4(2,1,A))
-                    
-    def test_meek_rule_1_b(self):
-        A = np.array([[0,1,1,0],
-                      [0,0,1,0],
-                      [0,1,0,0],
-                      [0,0,1,0]])
-        self.assertTrue(ges.utils.rule_1(2,1,A))
-        self.assertFalse(ges.utils.rule_1(1,2,A))
-        # Other rules should not orient the edge
-        self.assertFalse(ges.utils.rule_2(1,2,A))
-        self.assertFalse(ges.utils.rule_2(2,1,A))
-        self.assertFalse(ges.utils.rule_3(1,2,A))
-        self.assertFalse(ges.utils.rule_3(2,1,A))
-        self.assertFalse(ges.utils.rule_4(1,2,A))
-        self.assertFalse(ges.utils.rule_4(2,1,A))
-
-    def test_meek_rule_1_c(self):
-        A = np.array([[0,1,1],
-                       [0,0,1],
-                       [0,1,0]])
-        self.assertFalse(ges.utils.rule_1(1,2,A))
-        self.assertFalse(ges.utils.rule_1(2,1,A))
-        # Other rules should not orient the edge
-        self.assertFalse(ges.utils.rule_2(1,2,A))
-        self.assertFalse(ges.utils.rule_2(2,1,A))
-        self.assertFalse(ges.utils.rule_3(1,2,A))
-        self.assertFalse(ges.utils.rule_3(2,1,A))
-        self.assertFalse(ges.utils.rule_4(1,2,A))
-        self.assertFalse(ges.utils.rule_4(2,1,A))
-
-    def test_meek_rule_1_d(self):
-        A = np.array([[0,0,1,0,0],
-                      [0,0,1,0,0],
-                      [0,0,0,1,1],
-                      [0,0,1,0,0],
-                      [0,0,1,0,0]])
-        self.assertTrue(ges.utils.rule_1(2,3,A))
-        self.assertFalse(ges.utils.rule_1(3,2,A))
-        self.assertTrue(ges.utils.rule_1(2,4,A))
-        self.assertFalse(ges.utils.rule_1(4,2,A))
-        # Other rules should not orient the edges
-        self.assertFalse(ges.utils.rule_2(2,3,A))
-        self.assertFalse(ges.utils.rule_2(3,2,A))
-        self.assertFalse(ges.utils.rule_2(2,4,A))
-        self.assertFalse(ges.utils.rule_2(4,2,A))
-        self.assertFalse(ges.utils.rule_3(2,3,A))
-        self.assertFalse(ges.utils.rule_3(3,2,A))
-        self.assertFalse(ges.utils.rule_3(2,4,A))
-        self.assertFalse(ges.utils.rule_3(4,2,A))
-        self.assertFalse(ges.utils.rule_4(2,3,A))
-        self.assertFalse(ges.utils.rule_4(3,2,A))
-        self.assertFalse(ges.utils.rule_4(2,4,A))
-        self.assertFalse(ges.utils.rule_4(4,2,A))
-        
-    def test_meek_rule_2_a(self):
-        A = np.array([[0,1,1],
-                      [0,0,1],
-                      [1,0,0]])
-        self.assertTrue(ges.utils.rule_2(0,2,A))
-        self.assertFalse(ges.utils.rule_2(2,0,A))
-        # Other rules should not orient the edge
-        self.assertFalse(ges.utils.rule_1(0,2,A))
-        self.assertFalse(ges.utils.rule_1(2,0,A))
-        self.assertFalse(ges.utils.rule_3(0,2,A))
-        self.assertFalse(ges.utils.rule_3(2,0,A))
-        self.assertFalse(ges.utils.rule_4(0,2,A))
-        self.assertFalse(ges.utils.rule_4(2,0,A))
-
-    def test_meek_rule_2_b(self):
-        A = np.array([[0,1,1,1],
-                      [0,0,0,1],
-                      [0,0,0,1],
-                      [1,0,0,0]])
-        self.assertTrue(ges.utils.rule_2(0,3,A))
-        self.assertFalse(ges.utils.rule_2(3,0,A))
-        # Other rules should not orient the edge
-        self.assertFalse(ges.utils.rule_1(0,3,A))
-        self.assertFalse(ges.utils.rule_1(3,0,A))
-        self.assertFalse(ges.utils.rule_3(0,3,A))
-        self.assertFalse(ges.utils.rule_3(3,0,A))
-        self.assertFalse(ges.utils.rule_4(0,3,A))
-        self.assertFalse(ges.utils.rule_4(3,0,A))
-        
-    def test_meek_rule_2_c(self):
-        A = np.array([[0,1,1],
-                      [0,0,0],
-                      [1,1,0]])
-        self.assertFalse(ges.utils.rule_2(0,2,A))
-        self.assertFalse(ges.utils.rule_2(2,0,A))
-        # Other rules should not orient the edge
-        self.assertFalse(ges.utils.rule_1(0,2,A))
-        self.assertFalse(ges.utils.rule_1(2,0,A))
-        self.assertFalse(ges.utils.rule_3(0,2,A))
-        self.assertFalse(ges.utils.rule_3(2,0,A))
-        self.assertFalse(ges.utils.rule_4(0,2,A))
-        self.assertFalse(ges.utils.rule_4(2,0,A))
-
-    def test_meek_rule_2_d(self):
-        A = np.array([[0,1,0,1,0],
-                      [0,0,1,1,0],
-                      [0,0,0,0,1],
-                      [1,0,0,0,1],
-                      [0,0,1,1,0]])
-        # edge 0 - 3 should orient to 0 -> 3
-        self.assertTrue(ges.utils.rule_2(0,3,A))
-        self.assertFalse(ges.utils.rule_2(3,0,A))
-        # edge 2 - 4 should not be oriented
-        self.assertFalse(ges.utils.rule_2(2,4,A))
-        self.assertFalse(ges.utils.rule_2(4,2,A))
-        # edge 3 - 4 should not be oriented
-        self.assertFalse(ges.utils.rule_2(3,4,A))
-        self.assertFalse(ges.utils.rule_2(4,3,A))
-
-    def test_meek_rule_3_a(self):
-        A = np.array([[0,1,1,1],
-                      [1,0,0,1],
-                      [1,0,0,1],
-                      [1,0,0,0]])
-        self.assertTrue(ges.utils.rule_3(0,3,A))
-        self.assertFalse(ges.utils.rule_3(3,0,A))
-        # The other edges should not be oriented by rule 3
-        self.assertFalse(ges.utils.rule_3(0,1,A))
-        self.assertFalse(ges.utils.rule_3(1,0,A))
-        self.assertFalse(ges.utils.rule_3(0,2,A))
-        self.assertFalse(ges.utils.rule_3(2,0,A))
-        # None of the edges should be oriented by the other rules
-        for i,j in [(0,3),(0,1),(0,2)]:
-            self.assertFalse(ges.utils.rule_1(i,j,A))
-            self.assertFalse(ges.utils.rule_1(j,i,A))
-            self.assertFalse(ges.utils.rule_2(i,j,A))
-            self.assertFalse(ges.utils.rule_2(j,i,A))
-            self.assertFalse(ges.utils.rule_4(i,j,A))
-            self.assertFalse(ges.utils.rule_4(j,i,A))
-
-    def test_meek_rule_3_b(self):
-        A = np.array([[0,1,1,1],
-                      [1,0,0,1],
-                      [0,0,0,1],
-                      [1,0,0,0]])
-        # The edge 0 - 3 is not oriented by rule 3 but by rule 2
-        self.assertFalse(ges.utils.rule_3(0,3,A))
-        self.assertFalse(ges.utils.rule_3(3,0,A))
-        self.assertTrue(ges.utils.rule_2(0,3,A))
-        self.assertFalse(ges.utils.rule_2(3,0,A))
-        # No rule should orient the 0 - 1 edge
-        self.assertFalse(ges.utils.rule_1(0,1,A))
-        self.assertFalse(ges.utils.rule_1(1,0,A))
-        self.assertFalse(ges.utils.rule_2(0,1,A))
-        self.assertFalse(ges.utils.rule_2(1,0,A))
-        self.assertFalse(ges.utils.rule_3(0,1,A))
-        self.assertFalse(ges.utils.rule_3(1,0,A))
-        self.assertFalse(ges.utils.rule_4(0,1,A))
-        self.assertFalse(ges.utils.rule_4(1,0,A))
-
-    def test_meek_rule_3_c(self):
-        A = np.array([[0,1,1,1,1,0],
-                      [1,0,0,1,1,0],
-                      [1,0,0,1,1,0],
-                      [1,0,0,0,0,0],
-                      [1,0,0,0,0,0],
-                      [0,0,0,0,1,0]])
-        # The edges 0 - 3  and 0 - 4 should be oriented by rule 3
-        self.assertTrue(ges.utils.rule_3(0,3,A))
-        self.assertFalse(ges.utils.rule_3(3,0,A))
-        self.assertTrue(ges.utils.rule_3(0,4,A))
-        self.assertFalse(ges.utils.rule_3(4,0,A))
-        # The edges 0 - 1  and 0 - 2 should not be oriented by rule 3
-        self.assertFalse(ges.utils.rule_3(0,1,A))
-        self.assertFalse(ges.utils.rule_3(1,0,A))
-        self.assertFalse(ges.utils.rule_3(0,2,A))
-        self.assertFalse(ges.utils.rule_3(2,0,A))
-        # The edge 4 - 0 should be oriented to 4 -> 0 by rule 1
-        self.assertTrue(ges.utils.rule_1(4,0,A))
-        self.assertFalse(ges.utils.rule_1(0,4,A))
-        # No other rules should orient edges
-        for i,j in [(0,3),(0,4),(0,1),(0,2)]:
-            self.assertFalse(ges.utils.rule_2(i,j,A))
-            self.assertFalse(ges.utils.rule_2(j,i,A))
-            self.assertFalse(ges.utils.rule_4(i,j,A))
-            self.assertFalse(ges.utils.rule_4(j,i,A))
-
-    def test_meek_rule_4_a(self):
-        A = np.array([[0,1,1,0],
-                      [1,0,1,1],
-                      [0,1,0,1],
-                      [0,1,0,0]])
-        self.assertTrue(ges.utils.rule_4(1,3,A))
-        self.assertFalse(ges.utils.rule_4(3,1,A))
-        # The other edges should not be oriented by rule 4
-        self.assertFalse(ges.utils.rule_4(0,1,A))
-        self.assertFalse(ges.utils.rule_4(1,0,A))
-        self.assertFalse(ges.utils.rule_4(1,2,A))
-        self.assertFalse(ges.utils.rule_4(2,1,A))
-        # No rule should orient the other edges
-        for i,j in [(1,3),(0,1),(1,2)]:
-            self.assertFalse(ges.utils.rule_1(i,j,A))
-            self.assertFalse(ges.utils.rule_1(j,i,A))
-            self.assertFalse(ges.utils.rule_2(i,j,A))
-            self.assertFalse(ges.utils.rule_2(j,i,A))
-            self.assertFalse(ges.utils.rule_3(i,j,A))
-            self.assertFalse(ges.utils.rule_3(j,i,A))
-
-    def test_meek_rule_4_b(self):
-        A = np.array([[0,1,0,0,1],
-                      [0,0,1,0,1],
-                      [0,0,0,1,1],
-                      [0,0,0,0,1],
-                      [1,1,1,1,0]])
-        for i,j in [(4,2),(4,3)]:
-            # Rule 4 should orient 4 -> 2, 4 -> 3
-            self.assertTrue(ges.utils.rule_4(i,j,A))
-            self.assertFalse(ges.utils.rule_4(j,i,A))
-            # But other rules should not
-            self.assertFalse(ges.utils.rule_1(i,j,A))
-            self.assertFalse(ges.utils.rule_1(j,i,A))
-            self.assertFalse(ges.utils.rule_2(i,j,A))
-            self.assertFalse(ges.utils.rule_2(j,i,A))
-            self.assertFalse(ges.utils.rule_3(i,j,A))
-            self.assertFalse(ges.utils.rule_3(j,i,A))
-        # But the remaining edges should not be oriented by any rule
-        for i,j in [(0,4),(1,4)]:
-            self.assertFalse(ges.utils.rule_1(i,j,A))
-            self.assertFalse(ges.utils.rule_1(j,i,A))
-            self.assertFalse(ges.utils.rule_2(i,j,A))
-            self.assertFalse(ges.utils.rule_2(j,i,A))
-            self.assertFalse(ges.utils.rule_3(i,j,A))
-            self.assertFalse(ges.utils.rule_3(j,i,A))
-            self.assertFalse(ges.utils.rule_4(i,j,A))
-            self.assertFalse(ges.utils.rule_4(j,i,A))

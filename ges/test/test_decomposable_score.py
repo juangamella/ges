@@ -34,7 +34,6 @@
 import unittest
 import numpy as np
 
-
 from ges.scores.decomposable_score import DecomposableScore
 
 # Class to to test cache behaviour

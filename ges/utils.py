@@ -1,4 +1,4 @@
-# Copyright 2020 Juan Luis Gamella Martin
+# Copyright 2021 Juan L Gamella
 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -28,7 +28,9 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
+"""Module containing the auxiliary functions used in the
+implementation of GES, including the PDAG to CPDAG conversion
+algorithm described in Chickering's original GES paper from 2002.
 """
 
 import numpy as np
@@ -39,29 +41,118 @@ import itertools
 # Graph functions for PDAGS
 
 def na(y,x,A):
-    """All neighbors of y which are adjacent to x in A"""
+    """Return all neighbors of y which are adjacent to x in A.
+    
+    Parameters
+    ----------
+    y : int
+        the node's index
+    x : int
+        the node's index
+    A : np.array
+        the adjacency matrix of the graph, where A[i,j] != 0 => i -> j
+        and A[i,j] != 0 & A[j,i] != 0 => i - j.
+
+    Returns
+    -------
+    nodes : set of ints
+        the resulting nodes
+
+    """
     return neighbors(y,A) & adj(x,A)
 
 def neighbors(i,A):
     """The neighbors of i in A, i.e. all nodes connected to i by an
-    undirected edge"""
+    undirected edge.
+
+    Parameters
+    ----------
+    i : int
+        the node's index
+    A : np.array
+        the adjacency matrix of the graph, where A[i,j] != 0 => i -> j
+        and A[i,j] != 0 & A[j,i] != 0 => i - j.
+
+    Returns
+    -------
+    nodes : set of ints
+        the neighbor nodes
+
+    """
     return set(np.where(np.logical_and(A[i,:] != 0, A[:,i] != 0))[0])
     
 def adj(i, A):
     """The adjacent nodes of i in A, i.e. all nodes connected by a
-    directed or undirected edge"""
+    directed or undirected edge.
+    Parameters
+    ----------
+    i : int
+        the node's index
+    A : np.array
+        the adjacency matrix of the graph, where A[i,j] != 0 => i -> j
+        and A[i,j] != 0 & A[j,i] != 0 => i - j.
+
+    Returns
+    -------
+    nodes : set of ints
+        the adjacent nodes
+
+    """
     return set(np.where(np.logical_or(A[i,:] != 0, A[:,i] != 0))[0])
 
 def pa(i, A):
-    """The parents of i in A"""
+    """The parents of i in A.
+
+    Parameters
+    ----------
+    i : int
+        the node's index
+    A : np.array
+        the adjacency matrix of the graph, where A[i,j] != 0 => i -> j
+        and A[i,j] != 0 & A[j,i] != 0 => i - j.
+
+    Returns
+    -------
+    nodes : set of ints
+        the parent nodes
+    
+    """
     return set(np.where(np.logical_and(A[:,i] != 0, A[i,:] == 0))[0])
 
 def ch(i, A):
-    """The children of i in A"""
+    """The children of i in A.
+
+    Parameters
+    ----------
+    A : np.array
+        the adjacency matrix of the graph, where A[i,j] != 0 => i -> j
+        and A[i,j] != 0 & A[j,i] != 0 => i - j.
+
+    Returns
+    -------
+    nodes : set of ints
+        the children nodes
+
+    """
     return set(np.where(np.logical_and(A[i,:] != 0, A[:,i] == 0))[0])
 
 def is_clique(S, A):
-    """Check if the subgraph of A induced by nodes S is a clique"""
+    """Check if the subgraph of A induced by nodes S is a clique.
+
+    Parameters
+    ----------
+    S : set of ints
+        set containing the nodes' indices
+    A : np.array
+        the adjacency matrix of the graph, where A[i,j] != 0 => i -> j
+        and A[i,j] != 0 & A[j,i] != 0 => i - j.
+
+    Returns
+    -------
+    is_clique : bool
+        if the subgraph induced by S is a clique in A
+
+    """
     S = list(S)
     subgraph = A[S,:][:,S]
     subgraph = skeleton(subgraph) # drop edge orientations
@@ -656,6 +747,7 @@ def label_edges(ordered):
 # General utilities
 
 # Very fast way to generate a cartesian product of input arrays
+# Credit: https://gist.github.com/hernamesbarbara/68d073f551565de02ac5
 def cartesian(arrays, out=None, dtype=np.byte):
     """
     Generate a cartesian product of input arrays.
@@ -690,7 +782,6 @@ def cartesian(arrays, out=None, dtype=np.byte):
            [3, 5, 7]])
 
     """
-
     arrays = [np.asarray(x) for x in arrays]
     #dtype = arrays[0].dtype
 

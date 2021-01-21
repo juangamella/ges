@@ -1,4 +1,4 @@
-# Copyright 2020 Juan Luis Gamella Martin
+# Copyright 2021 Juan L Gamella
 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -116,7 +116,7 @@ class OverallGESTests(unittest.TestCase):
             start = time.time()
             # Estimate using this implementation
             estimate, _ = ges.fit(score_class,
-                              np.zeros_like(W), debug=4 if i < 2 else 2) # Test debugging output for the first 2 SCMs
+                                  np.zeros_like(W), debug=4 if i < 2 else 0) # Test debugging output for the first 2 SCMs
             end = time.time()
             print("    GES-own done (%0.2f seconds)" % (end - start))
             self.assertTrue((estimate == estimate_cdt).all())

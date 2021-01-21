@@ -1,4 +1,4 @@
-# Copyright 2020 Juan Luis Gamella Martin
+# Copyright 2021 Juan L Gamella
 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -316,8 +316,8 @@ class UtilsTests(unittest.TestCase):
 
     def test_semi_directed_paths_2(self):
         # Test vs. networkx implementation
-        G = 200
-        p = 10
+        G = 100
+        p = 30
         for i in range(G):
             A = sempler.dag_avg_deg(p,3,1,1)
             cpdag = ges.utils.pdag_to_cpdag(A)
@@ -332,7 +332,23 @@ class UtilsTests(unittest.TestCase):
                 paths_nx = list(nx.algorithms.all_simple_paths(G,y,x))
                 self.assertEqual(sorted(paths_nx), sorted(paths_own))
         print("Checked path enumeration for %d PDAGs" % (i+1))
-        
+
+    def test_semi_directed_paths_3(self):
+        A = np.array([[0,1,0,0],
+                      [1,0,1,1],
+                      [0,1,0,1],
+                      [0,1,1,0]])
+        G = nx.from_numpy_matrix(A, create_using=nx.DiGraph)
+        for (x,y) in itertools.combinations(range(len(A)),2):
+            # From x to y
+            paths_own = ges.utils.semi_directed_paths(x,y,A)
+            paths_nx = list(nx.algorithms.all_simple_paths(G,x,y))
+            self.assertEqual(sorted(paths_nx), sorted(paths_own))
+            # From y to x
+            paths_own = ges.utils.semi_directed_paths(y,x,A)
+            paths_nx = list(nx.algorithms.all_simple_paths(G,y,x))
+            self.assertEqual(sorted(paths_nx), sorted(paths_own))
+    
     def test_skeleton(self):
         # Test utils.skeleton
         skeleton = np.array([[0,1,1,0],

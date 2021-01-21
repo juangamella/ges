@@ -70,19 +70,65 @@ def is_clique(S, A):
     n = len(S)
     return no_edges == n * (n-1)
 
-def is_dag(B):
-    """Returns True if B is the connectivity matrix of a DAG, False
-    otherwise"""
-    # Note networkx takes B[i,j] = 1 => i -> j
-    G = nx.from_numpy_matrix(B, create_using = nx.DiGraph)
-    return nx.is_directed_acyclic_graph(G)
+def is_dag(A):
+    """Checks wether the given adjacency matrix corresponds to a DAG.
+
+    Parameters
+    ----------
+    A : np.array
+        the adjacency matrix of the graph, where A[i,j] != 0 => i -> j.
+
+    Returns
+    -------
+    is_dag : bool
+        if the adjacency corresponds to a DAG
+
+    """
+    try:
+        topological_ordering(A)
+        return True
+    except ValueError:
+        return False
 
 def topological_ordering(A):
-    """Return a topological ordering for the DAG with adjacency matrix A"""
-    # Note networkx takes A[i,j] = 1 => i -> j
-    G = nx.from_numpy_matrix(A, create_using = nx.DiGraph)
-    return list(nx.algorithms.dag.topological_sort(G))
+    """Return a topological ordering for the DAG with adjacency matrix A,
+    using Kahn's 1962 algorithm.
 
+    Raises a ValueError exception if the given adjacency does not
+    correspond to a DAG.
+    
+    Parameters
+    ----------
+    A : np.array
+        the adjacency matrix of the graph, where A[i,j] != 0 => i -> j.
+
+    Returns
+    -------
+    ordering : list of ints
+        a topological ordering for the DAG
+
+    """
+    # Check that there are no undirected edges
+    if only_undirected(A).sum() > 0:
+        raise ValueError("The given graph is not a DAG")
+    # Run the algorithm from the 1962 paper "Topological sorting of
+    # large networks" by AB Kahn
+    A = A.copy()
+    sinks = list(np.where(A.sum(axis=0) == 0)[0])
+    ordering = []
+    while len(sinks) > 0:
+        i = sinks.pop()
+        ordering.append(i)
+        for j in ch(i,A):
+            A[i,j] = 0
+            if len(pa(j,A)) == 0:
+                sinks.append(j)
+    # If A still contains edges there is at least one cycle
+    if A.sum() > 0:
+        raise ValueError("The given graph is not a DAG")
+    else:
+        return ordering
+    
 def semi_directed_paths(i,j,A):
     """Return all semi-directed paths from i to j in A"""
     G = nx.from_numpy_matrix(A, create_using=nx.DiGraph)

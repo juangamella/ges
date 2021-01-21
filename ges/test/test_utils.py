@@ -62,19 +62,30 @@ class UtilsTests(unittest.TestCase):
 
         
     def test_is_dag_1(self):
-        A = np.array([[0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0],
-                      [1, 1, 0, 0, 0],
+        # Should be correct
+        A = np.array([[0, 0, 1, 0, 0],
                       [0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 0]]).T
+                      [0, 0, 0, 1, 1],
+                      [0, 0, 0, 0, 1],
+                      [0, 0, 0, 0, 0]])
         self.assertTrue(ges.utils.is_dag(A))        
 
     def test_is_dag_2(self):
-        A = np.array([[0, 0, 0, 1, 0],
-                      [0, 0, 0, 0, 0],
-                      [1, 1, 0, 0, 0],
+        # DAG with a cycle
+        A = np.array([[0, 0, 1, 0, 0],
                       [0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 0]]).T
+                      [0, 0, 0, 1, 1],
+                      [1, 0, 0, 0, 1],
+                      [0, 0, 0, 0, 0]])
+        self.assertFalse(ges.utils.is_dag(A))
+
+    def test_is_dag_3(self):
+        # PDAG
+        A = np.array([[0, 0, 1, 0, 0],
+                      [0, 0, 1, 0, 0],
+                      [0, 0, 0, 1, 1],
+                      [0, 0, 0, 0, 1],
+                      [0, 0, 0, 1, 0]])
         self.assertFalse(ges.utils.is_dag(A))
 
     def test_topological_sort_1(self):
@@ -98,7 +109,22 @@ class UtilsTests(unittest.TestCase):
             self.fail()
         except:
             pass
-    
+
+    def test_topological_sort_3(self):
+        G = 100
+        p = 30
+        for i in range(G):
+            A = sempler.dag_avg_deg(p,3,1,1)
+            ordering = ges.utils.topological_ordering(A)
+            fro,to = np.where(A != 0)
+            # Test that the ordering is correct, i.e. for every edge x
+            # -> y in the graph, x appears before in the ordering
+            for (x,y) in zip(fro,to):
+                pos_x = np.where(np.array(ordering) == x)[0][0]
+                pos_y = np.where(np.array(ordering) == y)[0][0]
+                self.assertLess(pos_x, pos_y)
+        print("Checked topological sorting for %d DAGs" % (i+1))
+                
     def test_neighbors(self):
         p = 4
         A = np.zeros((p,p))
@@ -668,9 +694,9 @@ class UtilsTests(unittest.TestCase):
                           [0,0,1,0,0],
                           [0,0,1,0,0]])
         self.assertTrue((truth == ges.utils.induced_subgraph(S,G)).all())
-
-    # Tests for other auxiliary functions
         
+    # Tests for other auxiliary functions
+    
     def test_sort_1(self):
         # Test that without order, behaviour is identical as python's
         # sorted

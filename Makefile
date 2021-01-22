@@ -43,7 +43,8 @@ endif
 
 # Run the example scripts in the README
 examples:
-	PYTHONPATH=./ python docs/template_example.py
+	PYTHONPATH=./ python docs/ges_fit_bic_example.py
+	PYTHONPATH=./ python docs/ges_fit_example.py
 
 # Set up virtual environment
 venv:

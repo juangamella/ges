@@ -98,7 +98,7 @@ def fit_bic(data, A0 = None, phases = ['forward', 'backward', 'turning'], debug 
     
     Returns
     -------
-    A : np.array
+    estimate : np.array
         the adjacency matrix of the estimated CPDAG
     total_score : float
         the score of the estimate
@@ -110,17 +110,18 @@ def fit_bic(data, A0 = None, phases = ['forward', 'backward', 'turning'], debug 
     A0 = np.zeros((cache.p, cache.p)) if A0 is None else A0
     return fit(cache,A0,phases,debug)
 
-def fit(cache, A0 = None, phases = ['forward', 'backward', 'turning'], debug=0):
+def fit(score_class, A0 = None, phases = ['forward', 'backward', 'turning'], debug = 0):
     """
     Run GES using a user defined score.
 
     Parameters
     ----------
-    cache : DecomposableScore
+    score_class : ges.DecomposableScore
         an instance of a class which inherits from
         ges.decomposable_score.DecomposableScore (or defines a
-        local_score function, see ges.decomposable_score for more
-        info).
+        local_score function and a p attribute, see
+        ges.decomposable_score for more info).
+
     A0 : np.array, optional
         the initial CPDAG on which GES will run, where where A0[i,j]
         != 0 implies i -> j and A[i,j] != 0 & A[j,i] != 0 implies i -
@@ -134,7 +135,7 @@ def fit(cache, A0 = None, phases = ['forward', 'backward', 'turning'], debug=0):
     
     Returns
     -------
-    A : np.array
+    estimate : np.array
         the adjacency matrix of the estimated CPDAG
     total_score : float
         the score of the estimate
@@ -144,10 +145,11 @@ def fit(cache, A0 = None, phases = ['forward', 'backward', 'turning'], debug=0):
     if len(phases) == 0:
         raise ValueError("Must specify at least one phase")
     # Unless indicated otherwise, initialize to the empty graph
-    A0 = np.zeros((cache.p, cache.p)) if A0 is None else A0
+    A0 = np.zeros((score_class.p, score_class.p)) if A0 is None else A0
     # GES procedure
     total_score = 0
     A, score_change = A0, np.Inf
+    # Run each phase
     for phase in phases:
         if phase == 'forward':
             fun = forward_step
@@ -160,7 +162,7 @@ def fit(cache, A0 = None, phases = ['forward', 'backward', 'turning'], debug=0):
         print("\nGES %s phase start" % phase) if debug else None
         print("-------------------------") if debug else None
         while True:
-            score_change, new_A = fun(A, cache, max(0,debug-1))
+            score_change, new_A = fun(A, score_class, max(0,debug-1))
             if  score_change > 0:
                 A = utils.pdag_to_cpdag(new_A)
                 total_score += score_change

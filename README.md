@@ -5,7 +5,8 @@ This is a python implementation of the GES algorithm from the paper [*"Optimal S
 ```bash
 pip install ges
 ```
-The code has been thoroughly tested, through multilayer unit tests and by comparing its output to the existing GES implementation in the R package [`pcalg`](https://www.rdocumentation.org/packages/pcalg/versions/2.7-1). There are, however are additional dependencies to run the [tests](#tests)).
+
+The implementation has been thoroughly tested (see [tests](#tests)).
 
 ## When you should use this implementation
 
@@ -39,5 +40,16 @@ This is the variant which is normally found in the literature, and the one which
 ## Code Structure
 
 ## Tests
+
+All components have been throughly tested through unit tests, and the output of the overall procedure has been checked to match that of existing GES implementation in the [`pcalg`](https://www.rdocumentation.org/packages/pcalg/versions/2.7-1) package. Of course this doesn't mean there are no bugs, just that *they are less likely*.
+
+The tests can be found in the sub package `ges.test`, and are divided into modules depending on the components they test. They can be run with the makefile included in this repository:
+
+```shell
+make test
+```
+. There are, however are additional dependencies to run the [tests](#tests)).
+
+
 
 ## Feedback

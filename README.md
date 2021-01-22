@@ -52,10 +52,10 @@ All the modules can be found inside the `ges/` directory. These include:
 
 ## Tests
 
-All components come with unit tests to match. The output of the overall procedure has been checked against that of the [`pcalg`](https://www.rdocumentation.org/packages/pcalg/versions/2.7-1) implementation for tens of thousands of random graphs. Of course this doesn't mean there are no bugs, but hopefully it means *they are less likely* :)
+All components come with unit tests to match. The output of the overall procedure has been checked against that of the [`pcalg`](https://www.rdocumentation.org/packages/pcalg/versions/2.7-1) implementation for tens of thousands of random graphs. Of course, this doesn't mean there are no bugs, but hopefully it means *they are less likely* :)
 
-The tests can be found in the sub package `ges.test`, and can be run with `make test`. You can add `SUITE=<module_name>` to run a particular module only.
-
-There are, however, additional dependencies to run the tests. You can find these in [`requirements_tests.txt`](requirements_tests.txt).
+The tests can be found in the sub package `ges.test`, and can be run with `make test`. You can add `SUITE=<module_name>` to run a particular module only. There are, however, additional dependencies to run the tests. You can find these in [`requirements_tests.txt`](requirements_tests.txt).
 
 ## Feedback
+
+I hope you find this useful! I had to reimplement GES for my own research and I thought I might as well share it with other researchers in the same position. Feedback and (constructive) criticism is always wellcome, just shoot me an [email](mailto:juan.gamella@stat.math.ethz.ch)

@@ -33,14 +33,14 @@ This is the variant which is normally found in the literature, and the one which
 
 **Parameters**
 
-- data (np.array): the matrix containing the observations of each variable (each column corresponds to a variable).
-- A0 (np.array, optional): the initial CPDAG on which GES will run, where where `A0[i,j] != 0` implies `i -> j` and `A[i,j] != 0 & A[j,i] != 0` implies `i - j`. Defaults to the empty graph.
-- phases (`[{'forward', 'backward', 'turning'}*]`, optional): this controls which phases of the GES procedure are run, and in which order. Defaults to ['forward', 'backward', 'turning']. The turning phase was found by [Hauser & Bühlmann (2012)](https://www.jmlr.org/papers/volume13/hauser12a/hauser12a.pdf) to improve estimation performace, and is implemented here too.
-- debug (int, optional): if larger than 0, debug are traces printed. Higher values correspond to increased verbosity.
+- **data** (np.array): the matrix containing the observations of each variable (each column corresponds to a variable).
+- **A0** (np.array, optional): the initial CPDAG on which GES will run, where where `A0[i,j] != 0` implies `i -> j` and `A[i,j] != 0 & A[j,i] != 0` implies `i - j`. Defaults to the empty graph.
+- **phases** (`[{'forward', 'backward', 'turning'}*]`, optional): this controls which phases of the GES procedure are run, and in which order. Defaults to ['forward', 'backward', 'turning']. The turning phase was found by [Hauser & Bühlmann (2012)](https://www.jmlr.org/papers/volume13/hauser12a/hauser12a.pdf) to improve estimation performace, and is implemented here too.
+- **debug** (int, optional): if larger than 0, debug are traces printed. Higher values correspond to increased verbosity.
 
 **Returns**
-- A (np.array): the adjacency matrix of the estimated CPDAG
-- total_score (float): the score of the estimate
+- **estimate** (np.array): the adjacency matrix of the estimated CPDAG
+- **total_score** (float): the score of the estimate
 
 **Example**
 

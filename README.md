@@ -63,19 +63,21 @@ All the modules can be found inside the `ges/` directory. These include:
   - `ges.scores` contains the modules with the score classes:
       - `ges.scores.decomposable_score` contains the base class for decomposable score classes (see that module for more details).
       - `ges.scores.gauss_obs_l0_pen` contains an implementation of the cached gaussian BIC score, as used in the original GES paper.
-   - `ges.test` contains the modules with the unit tests and tests comparing against the algorithm's implementation in the 'pcalg' package.
-      - `ges.test.test_decomposable_score`: tests for decomposable score base class
-      - `ges.test.test_gauss_bic`: tests for the gaussian bic score
-      - `ges.test.test_operators`: tests for the insert, delete and turn operators
-      - `ges.test.test_pdag_to_cpdag`: tests the conversion from PDAG to CPDAG, which is applied after each application of an operator
-      - `ges.test.test_utils`: tests the other auxiliary functions
-      - `ges.test.test_vs_pcalg`: compares the output of the algorithm vs. that of `pcalg` for randomly generated graphs      
+   - `ges.test` contains the modules with the unit tests and tests comparing against the algorithm's implementation in the 'pcalg' package.   
 
 ## Tests
 
 All components come with unit tests to match, and some property-based tests. The output of the overall procedure has been checked against that of the [`pcalg`](https://www.rdocumentation.org/packages/pcalg/versions/2.7-1) implementation over tens of thousands of random graphs. Of course, this doesn't mean there are no bugs, but hopefully it means *they are less likely* :)
 
-The tests can be found in the sub package `ges.test`, and can be run with `make test`. You can add `SUITE=<module_name>` to run a particular module only. There are, however, additional dependencies to run the tests. You can find these in [`requirements_tests.txt`](requirements_tests.txt).
+The tests can be run with `make test`. You can add `SUITE=<module_name>` to run a particular module only. There are, however, additional dependencies to run the tests. You can find these in [`requirements_tests.txt`](requirements_tests.txt).
+
+The test modules are in the sub package `ges.test`, in the directory `ges/test`. They are
+    - `ges.test.test_decomposable_score`: tests for decomposable score base class
+    - `ges.test.test_gauss_bic`: tests for the gaussian bic score
+    - `ges.test.test_operators`: tests for the insert, delete and turn operators
+    - `ges.test.test_pdag_to_cpdag`: tests the conversion from PDAG to CPDAG, which is applied after each application of an operator
+    - `ges.test.test_utils`: tests the other auxiliary functions
+    - `ges.test.test_vs_pcalg`: compares the output of the algorithm vs. that of `pcalg` for randomly generated graphs
 
 ## Feedback
 

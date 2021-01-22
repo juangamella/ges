@@ -12,7 +12,7 @@ The implementation has been thoroughly tested (see [tests](#tests)), and has bee
 
 ## When you should use this implementation
 
-To the best of my knowledge, the only other public implementation of GES is in the R package [`pcalg`](https://www.rdocumentation.org/packages/pcalg/versions/2.7-1). It can be called from python through a wrapper in the [Causal Discovery Toolbox](https://github.com/FenTechSolutions/CausalDiscoveryToolbox) a.k.a. `cdt`. However, `cdt` contains many additional dependencies (including tensorflow) and still requires you to have `R`.
+To the best of my knowledge, the only other public implementation of GES is in the R package [`pcalg`](https://www.rdocumentation.org/packages/pcalg/versions/2.7-1). It can be called from Python through an easy-to-use wrapper in the [Causal Discovery Toolbox](https://github.com/FenTechSolutions/CausalDiscoveryToolbox), but this library contains many additional dependencies (including tensorflow) and still requires you to have `R`.
 
 Thus, **this implementation might be for you if**:
 

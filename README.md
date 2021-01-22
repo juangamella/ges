@@ -46,9 +46,9 @@ All the modules can be found inside the `ges/` directory. These include:
   - `ges.ges` which is the main module with the calls to start GES, and contains the implementation of the insert, delete and turn operators.
   - `ges.utils` contains auxiliary functions and the logic to transform a PDAG into a CPDAG, used after each application of an operator.
   - `ges.scores` contains the modules with the score classes:
-      - ges.scores.decomposable_score contains the base class for decomposable score classes (see that module for more details).
-      - ges.scores.gauss_obs_l0_pen contains an implementation of the cached gaussian BIC score, as used in the original GES paper.
-   - ges.test contains the modules with the unit tests and tests comparing against the algorithm's implementation in the 'pcalg' package.
+      - `ges.scores.decomposable_score` contains the base class for decomposable score classes (see that module for more details).
+      - `ges.scores.gauss_obs_l0_pen` contains an implementation of the cached gaussian BIC score, as used in the original GES paper.
+   - `ges.test` contains the modules with the unit tests and tests comparing against the algorithm's implementation in the 'pcalg' package.
 
 ## Tests
 

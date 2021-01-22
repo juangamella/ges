@@ -48,8 +48,8 @@ examples:
 
 # Set up virtual environment
 venv:
-	python3 -m venv venv
-	. venv/bin/activate; pip install pip==20.2.4; pip install -r requirements.txt
+	virtualenv --no-site-packages venv
+	. venv/bin/activate; pip install -r requirements.txt
 
 clean:
 	rm -rf venv

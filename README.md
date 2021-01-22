@@ -51,7 +51,7 @@ ges.fit_bic(data, A0 = None, phases = ['forward', 'backward', 'turning'], debug 
 ### Using a custom score: `ges.fit`
 
 ```python
-ges.fit(score_class, A0 = None, phases = ['forward', 'backward', 'turning'], debug=0)
+ges.fit(score_class, A0 = None, phases = ['forward', 'backward', 'turning'], debug = 0)
 ```
 
 ## Code Structure

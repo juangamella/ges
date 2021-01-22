@@ -30,7 +30,7 @@
 
 """The main module, containing the implementation of GES, including
 the logic for the insert, delete and turn operators. The
-implementation is based on two papers:
+implementation is directly based on two papers:
 
   1. The 2002 GES paper by Chickering, "Optimal Structure
   Identification With Greedy Search" -
@@ -63,14 +63,14 @@ import numpy as np
 import ges.utils as utils
 from ges.scores.gauss_obs_l0_pen import GaussObsL0Pen
 
-# TODO: Update sempler.utils version of matrix_block
-# Done TODO: ASSUME DATA IS CENTERED
-# TODO: Raise exception if x or y are contained in H or T
-# Done, decided to keep old behaviour; TODO: If condition 1 does not pass for an operator, do not check condition 2
-# TODO: Update research utils with new changes
 # TODO: Rubber duck turning logic and semi_directed_paths
+# TODO: Raise exception if x or y are contained in H or T
 # TODO: Write README & requirements
 # TODO: Finish documenting all functions
+# TODO: Update research utils with new changes
+# TODO: Update sempler.utils version of matrix_block
+# Done TODO: ASSUME DATA IS CENTERED
+# Done, decided to keep old behaviour; TODO: If condition 1 does not pass for an operator, do not check condition 2
 
 def fit_bic(data, A0 = None, phases = ['forward', 'backward', 'turning'], debug = 0):
     """

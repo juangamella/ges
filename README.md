@@ -17,7 +17,7 @@ To the best of my knowledge, the only other public implementation of GES is in t
 Thus, **this implementation might be for you if**:
 
 - you want a dependency-light implementation (the only dependence outside the Standard Library is numpy), or
-- you want to rewrite parts of GES for your own research, but you'd rather do it in Python. There is an emphasis on readability. The code is thoroughly documented and everything is properly referenced back to the GES/GIES papers.
+- you want to rewrite parts of GES for your own research, but you'd rather do it in Python. There was an emphasis on readability, and everything is thoroughly documented and properly referenced back to the GES/GIES papers.
 
 **You should NOT use this implementation if:**
 

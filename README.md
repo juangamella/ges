@@ -21,9 +21,8 @@ Thus, **this implementation might be for you if**:
 - you want a dependency-light implementation (the only dependence outside the Standard Library is numpy), or
 - you want to rewrite parts of GES for your own research, but you'd rather do it in Python. The code has been written with an emphasis on readability, and everything is thoroughly documented and properly referenced back to the [GES](https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf)/[GIES](https://www.jmlr.org/papers/volume13/hauser12a/hauser12a.pdf) papers.
 
-**You should NOT use this implementation if:**
+**You should not use this implementation if:**
 
-- you dont care about a large dependency stack,
 - you have no interest in modifying GES itself, or
 - you care about speed, as the `pcalg` implementation is highly optimized and is **very** fast.
 

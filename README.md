@@ -153,13 +153,14 @@ The tests can be run with `make test`. You can add `SUITE=<module_name>` to run 
 
 **Test modules**
 
-They are in the sub package `ges.test`, in the directory `ges/test/`. They are
+They are in the sub package `ges.test`, in the directory `ges/test/`:
 
-   - `test_decomposable_score.py`: tests for decomposable score base class.
+   - `test_decomposable_score.py`: tests for the decomposable score base class.
    - `test_gauss_bic.py`: tests for the gaussian bic score.
    - `test_operators.py`: tests for the insert, delete and turn operators.
    - `test_pdag_to_cpdag.py`: tests the conversion from PDAG to CPDAG, which is applied after each application of an operator.
-   - `test_utils.py`: tests the other auxiliary functions    - `ges.test.test_vs_pcalg`: compares the output of the algorithm vs. that of `pcalg` for randomly generated graphs.
+   - `test_utils.py`: tests the other auxiliary functions
+   - `ges.test.test_vs_pcalg`: compares the output of the algorithm vs. that of `pcalg` for randomly generated graphs.
 
 ## Feedback
 

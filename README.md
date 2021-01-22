@@ -10,7 +10,7 @@ pip install ges
 
 The implementation has been thoroughly tested (see [tests](#tests)), and has been written with an emphasis on readability and keeping a tiny dependency stack.
 
-## When you should use this implementation
+## When you should (and shouldn't) use this implementation
 
 To the best of my knowledge, the only other public implementation of GES is in the R package [`pcalg`](https://www.rdocumentation.org/packages/pcalg/versions/2.7-1). It can be called from Python through an easy-to-use wrapper in the [Causal Discovery Toolbox](https://github.com/FenTechSolutions/CausalDiscoveryToolbox), but given its scope, this library contains many additional dependencies (including tensorflow) and still requires you to have `R`.
 
@@ -21,9 +21,9 @@ Thus, **this implementation might be for you if**:
 
 **You should NOT use this implementation if:**
 
-- You dont care about a large dependency stack,
+- you dont care about a large dependency stack,
 - you have no interest in modifying GES itself, or
-- you care about speed; the `pcalg` implementation is highly optimized and is **very** fast.
+- you care about speed, as the `pcalg` implementation is highly optimized and is **very** fast.
 
 ## Running the algorithm
 
@@ -64,6 +64,12 @@ All the modules can be found inside the `ges/` directory. These include:
       - `ges.scores.decomposable_score` contains the base class for decomposable score classes (see that module for more details).
       - `ges.scores.gauss_obs_l0_pen` contains an implementation of the cached gaussian BIC score, as used in the original GES paper.
    - `ges.test` contains the modules with the unit tests and tests comparing against the algorithm's implementation in the 'pcalg' package.
+      - `ges.test.test_decomposable_score`: tests for decomposable score base class
+      - `ges.test.test_gauss_bic`: tests for the gaussian bic score
+      - `ges.test.test_operators`: tests for the insert, delete and turn operators
+      - `ges.test.test_pdag_to_cpdag`: tests the conversion from PDAG to CPDAG, which is applied after each application of an operator
+      - `ges.test.test_utils`: tests the other auxiliary functions
+      - `ges.test.test_vs_pcalg`: compares the output of the algorithm vs. that of `pcalg` for randomly generated graphs      
 
 ## Tests
 
@@ -73,4 +79,4 @@ The tests can be found in the sub package `ges.test`, and can be run with `make 
 
 ## Feedback
 
-I hope you find this useful! Feedback and (constructive) criticism is always wellcome, just shoot me an [email](mailto:juan.gamella@stat.math.ethz.ch) :)
+I hope you find this useful! Feedback and (constructive) criticism is always welcome, just shoot me an [email](mailto:juan.gamella@stat.math.ethz.ch) :)

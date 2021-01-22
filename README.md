@@ -1,13 +1,12 @@
 # Greedy Equivalence Search (GES) algorithm for Causal Discovery
 
-This is a python implementation of the GES algorithm from the [paper](https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf) *"Optimal Structure Identification With Greedy Search"* by David Maxwell Chickering.
+This is a python implementation of the GES algorithm from the [paper](https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf) *"Optimal Structure Identification With Greedy Search"* by David Maxwell Chickering. The implementation has a very small dependency stack, as the only dependency outside the Standard Library is numpy. You can install it via pip:
 
-It has a very small dependency stack: the only dependency outside the Standard Library is `numpy`. You can install it via pip by
 ```bash
 pip install ges
 ```
-
-There are additional dependencies to run the tests
+The code has been thoroughly tested via unit testing and its output compared against that of the R package [`pcalg`] for thousands of random graphs
+(note that there are additional dependencies to run the [tests](#tests)).
 
 ## When you should use this implementation
 

@@ -1,4 +1,4 @@
-# Greedy Equivalence Search (GES) algorithm for Causal Discovery
+# Greedy Equivalence Search (GES) Algorithm for Causal Discovery
 
 This is a python implementation of the GES algorithm from the paper [*"Optimal Structure Identification With Greedy Search"*]((https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf)) by David Maxwell Chickering. The implementation has a very small dependency stack, as the only dependency outside the Standard Library is numpy. You can install it via pip:
 
@@ -23,6 +23,18 @@ Thus, **this implementation might be for you if**:
 - you care about speed; the `pcalg` implementation is highly optimized and is **very** fast.
 
 ## Running the algorithm
+
+### Using the gaussian BIC score: `ges.fit_bic`
+
+This is the variant which is normally found in the literature, and the one which was implemented in the original paper. It is made available under the function `ges.fit_bic`, which takes the following parameters
+
+**Parameters**
+
+**Returns**
+
+**Example**
+
+### Using a custom score
 
 ## Code Structure
 

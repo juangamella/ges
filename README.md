@@ -8,7 +8,7 @@ You can install it via pip:
 pip install ges
 ```
 
-The implementation has been thoroughly tested (see [tests](#tests)).
+The implementation has been thoroughly tested (see [tests](#tests)), and has been written with an emphasis on readability and keeping a tiny dependency stack.
 
 ## When you should use this implementation
 

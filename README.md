@@ -5,8 +5,7 @@ This is a python implementation of the GES algorithm from the [paper](https://ww
 ```bash
 pip install ges
 ```
-The code has been thoroughly tested via unit testing and its output compared against that of the R package [`pcalg`] for thousands of random graphs
-(note that there are additional dependencies to run the [tests](#tests)).
+The code has been thoroughly tested, through multilayer unit tests and by comparing its output to the existing GES implementation in the R package [`pcalg`] for thousands of random graphs. There are, however are additional dependencies to run the [tests](#tests)).
 
 ## When you should use this implementation
 

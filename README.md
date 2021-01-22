@@ -9,17 +9,16 @@ pip install ges
 
 There are additional dependencies to run the tests
 
-### When you should use this implementation
+## When you should use this implementation
 
 To the best of my knowledge, the only other public implementation of GES is in the R package [`pcalg`](https://www.rdocumentation.org/packages/pcalg/versions/2.7-1). It can be called from python through a wrapper in the [Causal Discovery Toolbox](https://github.com/FenTechSolutions/CausalDiscoveryToolbox) a.k.a. `cdt`. However, `cdt` contains many additional dependencies (including tensorflow) and still requires you to have `R`.
 
-Thus, this implementation might be for you if:
+Thus, **this implementation might be for you if**:
+
 - you want a dependency-light implementation (the only dependence outside the Standard Library is numpy), or
-- you want to rewrite parts of GES for your own research, but you'd rather do it in Python.
+- you want to rewrite parts of GES for your own research, but you'd rather do it in Python. There is an emphasis on readability. The code is thoroughly documented and everything is properly referenced back to the GES/GIES papers.
 
-There is an emphasis on readability. The code is thoroughly documented and everything is properly referenced back to the GES/GIES papers.
-
-### When you should NOT use this implementation
+You should NOT use this implementation if:
 
 - You dont care about a large dependency stack,
 - you have no interest in modifying GES itself, or

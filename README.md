@@ -10,6 +10,10 @@ You can clone this repo or install the python package via pip:
 pip install ges
 ```
 
+**Dependencies**
+
+The _only_ dependency outside the Python Standard Library is `numpy`. See [`requirements.txt`](requirements.txt) for more details.
+
 ## When you should (and shouldn't) use this implementation
 
 To the best of my knowledge, the only other public implementation of GES is in the R package [`pcalg`](https://www.rdocumentation.org/packages/pcalg/versions/2.7-1). It can be called from Python through an easy-to-use wrapper in the [Causal Discovery Toolbox](https://github.com/FenTechSolutions/CausalDiscoveryToolbox), but given its scope, this library contains many additional dependencies (including tensorflow) and still requires you to have `R`.

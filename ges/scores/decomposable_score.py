@@ -32,6 +32,12 @@
 classes which implement a locally decomposable score for directed
 acyclic graphs. By default, the class also caches the results of
 computing local scores.
+
+NOTE: It is not mandatory to inherit this class when developing custom
+scores to use with the GES implementation in ges.py. The only
+requirement is that the class defines the local_score function (see
+below).
+
 """
 
 import copy
@@ -45,24 +51,7 @@ class DecomposableScore():
         self._data = copy.deepcopy(data)
         self._cache = {} if cache else None
         self._debug = debug
-        
-    def full_score(self, A):
-        """
-        Return the score of the given DAG adjacency A.
-
-        Parameters
-        ----------
-        A : np.array
-            The adjacency matrix of a DAG, where A[i,j] != 0 => i -> j
-
-        Returns
-        -------
-        score : float
-            The corresponding score.
-
-        """
-        return 0
-    
+            
     def local_score(self, x, pa):
         """
         Return the local score of a given node and a set of

@@ -75,30 +75,16 @@ class OverallGESTests(unittest.TestCase):
 
     # ------------------------------------------------------
     # Tests
-    # def test_forward_step(self):
-    #     cache = ges.ScoreCache(ges.scores.gauss_obs_bic.local, self.obs_data)
-    #     A = np.zeros_like(self.true_A)
-    #     score_change, new_A = ges.forward_step(A, cache, debug=True)
-    #     self.assertGreater(score_change, 0)
-        
-    # def test_ges_1(self):
-    #     # For a hand-picked example, with enough observations
-    #     cpdag, _ = ges.ges(self.obs_data,
-    #                        ges.scores.gauss_obs_bic.local,
-    #                        np.zeros_like(self.true_A),
-    #                        debug=1)
-    #     truth = np.array([[0, 0, 1, 0, 0],
-    #                       [0, 0, 1, 0, 0],
-    #                       [0, 0, 0, 1, 1],
-    #                       [0, 0, 0, 0, 1],
-    #                       [0, 0, 0, 1, 0]])
-    #     self.assertTrue((cpdag == truth).all())
 
-    def test_vs_cdt(self):
-        np.random.seed(12)
-        G = 500
-        p = 15
-        n = 1500
+    def test_vs_cdt_1(self):
+        # Test that behaviour matches that of the implementation in
+        # the R package pcalg, using 500 randomly generated
+        # Erdos-Renyi graphs. The call is made through the ges.fit_bic
+        # function
+        np.random.seed(15)
+        G = 5 # number of graphs
+        p = 15 # number of variables
+        n = 1500 # size of the observational sample
         for i in range(G):
             print("  Checking SCM %d" % (i))
             start = time.time()
@@ -115,8 +101,40 @@ class OverallGESTests(unittest.TestCase):
             print("    GES-CDT done (%0.2f seconds)" % (end - start))
             start = time.time()
             # Estimate using this implementation
-            estimate, _ = ges.fit(score_class,
-                                  np.zeros_like(W), debug=4 if i < 2 else 0) # Test debugging output for the first 2 SCMs
+            # Test debugging output for the first 2 SCMs
+            estimate, _ = ges.fit_bic(obs_sample, debug=4 if i < 2 else 2)
+            end = time.time()
+            print("    GES-own done (%0.2f seconds)" % (end - start))
+            self.assertTrue((estimate == estimate_cdt).all())
+        print("\nCompared with PCALG implementation on %d DAGs" % (i+1))  
+    
+    def test_vs_cdt_2(self):
+        # Test that behaviour matches that of the implementation in
+        # the R package pcalg, using 500 randomly generated
+        # Erdos-Renyi graphs. The call is made through the ges.fit
+        # function
+        np.random.seed(16)
+        G = 5 # number of graphs
+        p = 15 # number of variables
+        n = 1500 # size of the observational sample
+        for i in range(G):
+            print("  Checking SCM %d" % (i))
+            start = time.time()
+            A = sempler.dag_avg_deg(p,3,1,1)
+            W = A * np.random.uniform(1,2,A.shape)
+            obs_sample = sempler.LGANM(W, (0.5,1), (1,10)).sample(n=n)
+            # Estimate the equivalence class using the pcalg
+            # implementation of GES (package cdt)
+            data = pd.DataFrame(obs_sample)
+            score_class = ges.scores.gauss_obs_l0_pen.GaussObsL0Pen(obs_sample)
+            output = GES(verbose=True).predict(data)
+            estimate_cdt = nx.to_numpy_array(output)
+            end = time.time()
+            print("    GES-CDT done (%0.2f seconds)" % (end - start))
+            start = time.time()
+            # Estimate using this implementation
+            # Test debugging output for the first 2 SCMs
+            estimate, _ = ges.fit(score_class, debug=4 if i < 2 else 2)
             end = time.time()
             print("    GES-own done (%0.2f seconds)" % (end - start))
             self.assertTrue((estimate == estimate_cdt).all())

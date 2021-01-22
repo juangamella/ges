@@ -593,7 +593,7 @@ def pdag_to_dag(P, debug=False):
     P : np.array
         adjacency matrix representing the PDAG connectivity, where
         P[i,j] = 1 => i->j
-    debug : bool
+    debug : bool, optional
         if debugging traces should be printed
 
     Returns
@@ -647,7 +647,7 @@ def pdag_to_dag(P, debug=False):
     
 def order_edges(G):
     """
-    Produce a total ordering of the edges in DAG G, as an intermediate
+    Find a total ordering of the edges in DAG G, as an intermediate
     step to obtaining the CPDAG representing the Markov equivalence class to
     which it belongs. Raises a ValueError exception if G is not a DAG.
 
@@ -787,7 +787,6 @@ def cartesian(arrays, out=None, dtype=np.byte):
 
     """
     arrays = [np.asarray(x) for x in arrays]
-    #dtype = arrays[0].dtype
 
     n = np.prod([x.size for x in arrays])
     if out is None:
@@ -802,23 +801,24 @@ def cartesian(arrays, out=None, dtype=np.byte):
     return out
 
 def sort(L, order=None):
-    """Sort the elements in an iterable according to its 'sorted'
-    function, or according to a given order: i will precede j if i precedes
-    j in the order.
+    """Sort the elements in an iterable according to its pre-defined
+    'sorted' function, or according to a given order: i will precede j
+    if i precedes j in the order.
 
     Parameters
     ----------
     L : iterable
         the iterable to be sorted
-    order : iterable or None
+    order : iterable or None, optional
         a given ordering. In the sorted result, i will precede j if i
-        precedes j in order. If None, i will precede j if i < j
+        precedes j in order. If None, the predefined 'sorted' function
+        of the iterator will be used. Defaults to None.
 
     Returns
     -------
     ordered : list
         a list containing the elements of L, sorted from lesser to
-        greater or according to the given order
+        greater or according to the given order.
 
     """
     L = list(L)
@@ -852,8 +852,22 @@ def subsets(S):
     return subsets
 
 def member(L, A):
-    """Return the index of the first appearance of array A in list
-    L. Returns None if A is not in L.
+    """
+    Return the index of the first appearance of array A in L.
+    
+    Parameters
+    ----------
+    L : list of np.array
+        list on which to perform the search
+    A : np.array
+        the target array
+
+    Returns
+    -------
+    position : int or None
+        the index of the first appearance of array A in list L, or
+        None if A is not in L.
+
     """
     for i,B in enumerate(L):
         if (A==B).all():

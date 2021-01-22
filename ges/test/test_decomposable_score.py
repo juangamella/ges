@@ -82,7 +82,6 @@ class DecomposableScoreTests(unittest.TestCase):
 
     def test_api(self):
         score = DecomposableScore(None, True, True)
-        score.full_score(np.zeros((10,10)))
         score.local_score(0, {})
         
     def test_cache_on(self):

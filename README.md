@@ -19,7 +19,7 @@ To the best of my knowledge, the only other public implementation of GES is in t
 Thus, **this implementation might be for you if**:
 
 - you want a dependency-light implementation (the only dependence outside the Standard Library is numpy), or
-- you want to rewrite parts of GES for your own research, but you'd rather do it in Python. There is an emphasis on readability, and everything is thoroughly documented and properly referenced back to the GES/GIES papers.
+- you want to rewrite parts of GES for your own research, but you'd rather do it in Python. The code has been written with an emphasis on readability, and everything is thoroughly documented and properly referenced back to the [GES](https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf)/[GIES](https://www.jmlr.org/papers/volume13/hauser12a/hauser12a.pdf) papers.
 
 **You should NOT use this implementation if:**
 
@@ -51,6 +51,17 @@ ges.fit_bic(data, A0 = None, phases = ['forward', 'backward', 'turning'], debug 
 **Example**
 
 ### Using a custom score: `ges.fit`
+
+**Parameters**
+
+- **score_class** (ges.scores.DecomposableScore): an instance of a class implementing a locally decomposable score, which inherits from `ges.scores.DecomposableScore` (see [ges/scores/decomposable_score.py](ges/scores/decomposable_score.py) for more details.
+- **A0** (np.array, optional): the initial CPDAG on which GES will run, where where `A0[i,j] != 0` implies `i -> j` and `A[i,j] != 0 & A[j,i] != 0` implies `i - j`. Defaults to the empty graph.
+- **phases** (`[{'forward', 'backward', 'turning'}*]`, optional): this controls which phases of the GES procedure are run, and in which order. Defaults to ['forward', 'backward', 'turning']. The turning phase was found by [Hauser & Bühlmann (2012)](https://www.jmlr.org/papers/volume13/hauser12a/hauser12a.pdf) to improve estimation performace, and is implemented here too.
+- **debug** (int, optional): if larger than 0, debug are traces printed. Higher values correspond to increased verbosity.
+
+**Returns**
+- **estimate** (np.array): the adjacency matrix of the estimated CPDAG
+- **total_score** (float): the score of the estimate
 
 ```python
 ges.fit(score_class, A0 = None, phases = ['forward', 'backward', 'turning'], debug = 0)

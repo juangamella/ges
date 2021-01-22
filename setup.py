@@ -11,5 +11,5 @@ setup(
     license='LICENSE.txt',
     description='Python implementation of the GES algorithm for causal discovery',
     long_description=open('README.txt').read(),
-    install_requires=[numpy]
+    install_requires=['numpy']
 )

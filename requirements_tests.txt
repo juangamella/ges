@@ -1,5 +1,11 @@
-sempler
-networkx
-pandas
-cdt
+# R requirements for the tests are in R_requirements_tests.txt
 numpy
+sempler
+causaldag
+# For CDT
+# The installation of pytorch might be different in your system
+-f https://download.pytorch.org/whl/torch_stable.html
+torch==1.7.0+cpu
+torchvision==0.8.1+cpu
+torchaudio==0.7.0
+cdt==0.5.21

@@ -873,3 +873,29 @@ def member(L, A):
         if (A==B).all():
             return i
     return None
+
+def delete(array, mask, axis=None):
+    """
+    Wrapper for numpy.delete, which adapts the call depending on the numpy version (the API changed on 1.19.0)
+
+    Parameters
+    ----------
+    array : array_like
+        Input array.
+    mask : boolean array
+        Specifies the sub-arrays to remove along the given axis
+    axis : int
+        The axis along which to delete the subarrays specified by mask
+
+    Returns
+    -------
+    out : ndarray
+        a copy of array with the elements specified by mask removed
+
+    """
+    if np.version.version < '1.19.0':
+        idx = np.where(mask)[0]
+        return np.delete(array, idx, axis)
+    else:
+        return np.delete(array, mask, axis)
+

@@ -419,7 +419,7 @@ def score_valid_insert_operators(x,y,A,cache,debug=0):
             # Remove from consideration all other sets T' which
             # contain T, as the clique condition will also not hold
             supersets = subsets[:,T].all(axis=1)
-            subsets = np.delete(subsets, supersets, axis=0)
+            subsets = utils.delete(subsets, supersets, axis=0)
         # Condition 2: Test that all semi-directed paths from y to x contain a
         # member from NA_yx U T
         if passed_cond_2:
@@ -719,7 +719,7 @@ def score_valid_turn_operators_dir(x,y,A,cache,debug=0):
             # Remove from consideration all other sets T' which
             # contain T, as the clique condition will also not hold
             supersets = subsets[:,T].all(axis=1)
-            subsets = np.delete(subsets, supersets, axis=0)
+            subsets = utils.delete(subsets, supersets, axis=0)
         # Condition 2: Test that all semi-directed paths from y to x contain a
         # member from C U neighbors(x)
         if passed_cond_2:
@@ -801,7 +801,7 @@ def score_valid_turn_operators_undir(x,y,A,cache,debug=0):
     subsets[:, C0] = utils.cartesian([np.array([False,True])] * len(C0), dtype=np.bool)
     # Remove all subsets which do not contain at least one non-adjacent node to x
     to_remove = (subsets[:,non_adjacents] == False).all(axis=1)
-    subsets = np.delete(subsets, to_remove, axis=0)
+    subsets = utils.delete(subsets, to_remove, axis=0)
     # With condition (ii) guaranteed, we now check conditions (i,iii)
     # for each subset
     valid_operators = []
@@ -820,7 +820,7 @@ def score_valid_turn_operators_undir(x,y,A,cache,debug=0):
             # Remove from consideration all other sets C' which
             # contain C, as the clique condition will also not hold
             supersets = subsets[:,list(C)].all(axis=1)
-            subsets = np.delete(subsets, supersets, axis=0)
+            subsets = utils.delete(subsets, supersets, axis=0)
             continue
         # Condition (iii): Note that condition (iii) from proposition
         # 31 appears to be wrong in the GIES paper; instead we use the

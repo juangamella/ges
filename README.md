@@ -50,6 +50,39 @@ ges.fit_bic(data, A0 = None, phases = ['forward', 'backward', 'turning'], debug 
 
 **Example**
 
+Here [sempler](https://github.com/juangamella/sempler) is used to generate an observational sample from a Gaussian SCM, but this is not a dependency.
+
+```python
+import ges
+import sempler
+import numpy as np
+
+# Generate observational data from a Gaussian SCM using sempler
+A = np.array([[0, 0, 1, 0, 0],
+              [0, 0, 1, 0, 0],
+              [0, 0, 0, 1, 1],
+              [0, 0, 0, 0, 1],
+              [0, 0, 0, 0, 0]])
+W = A * np.random.uniform(1, 2, A.shape) # sample weights
+data = sempler.LGANM(W,(1,2), (1,2)).sample(n=5000)
+
+# Run GES with the gaussian BIC score
+estimate, score = ges.fit_bic(data)
+
+print(estimate)
+print(score)
+
+# Output
+# Estimate:
+# [[0 0 1 0 0]
+#  [0 0 1 0 0]
+#  [0 0 0 0 1]
+#  [0 0 0 0 0]
+#  [0 0 0 1 0]]
+# Score: 
+# 5853.530111138814
+```
+
 ### Using a custom score: `ges.fit`
 
 While [Chickering (2002)](https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf) chose the BIC score because of consistency, any score equivalent and locally decomposable function is adequate. To run with another score of your choice, you can use

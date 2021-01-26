@@ -32,9 +32,9 @@ SUITE = all
 PROJECT = ges
 
 # Run tests
-tests: test
+tests: test examples
 
-test: examples
+test:
 ifeq ($(SUITE),all)
 	python -m unittest discover $(PROJECT).test
 else

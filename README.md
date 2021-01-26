@@ -30,7 +30,7 @@ Thus, **this implementation might be for you if**:
 
 ### Using the gaussian BIC score: `ges.fit_bic`
 
-This is the variant which is normally found in the literature, and the one which was implemented in the original paper. It is made available under the function `ges.fit_bic`.
+GES comes ready to use with [Gaussian BIC score](https://en.wikipedia.org/wiki/Bayesian_information_criterion#Gaussian_special_case), i.e. the l0-penalized gaussian likelihood score. This is the variant which is normally found in the literature, and the one which was implemented in the original paper. It is made available under the function `ges.fit_bic`.
 
 ```python
 ges.fit_bic(data, A0 = None, phases = ['forward', 'backward', 'turning'], debug = 0)

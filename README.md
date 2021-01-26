@@ -44,8 +44,8 @@ ges.fit_bic(data, A0 = None, phases = ['forward', 'backward', 'turning'], debug 
 - **debug** (int, optional): if larger than 0, debug are traces printed. Higher values correspond to increased verbosity.
 
 **Returns**
-- **estimate** (np.array): the adjacency matrix of the estimated CPDAG
-- **total_score** (float): the score of the estimate
+- **estimate** (np.array): the adjacency matrix of the estimated CPDAG.
+- **total_score** (float): the score of the estimate.
 
 **Example**
 
@@ -96,8 +96,8 @@ where `score_class` is an instance of the class which implements your score. It 
 - **debug** (int, optional): if larger than 0, debug are traces printed. Higher values correspond to increased verbosity.
 
 **Returns**
-- **estimate** (np.array): the adjacency matrix of the estimated CPDAG
-- **total_score** (float): the score of the estimate
+- **estimate** (np.array): the adjacency matrix of the estimated CPDAG.
+- **total_score** (float): the score of the estimate.
 
 **Example**
 
@@ -159,7 +159,7 @@ They are in the sub package `ges.test`, in the directory `ges/test/`:
    - `test_gauss_bic.py`: tests for the Gaussian bic score.
    - `test_operators.py`: tests for the insert, delete and turn operators.
    - `test_pdag_to_cpdag.py`: tests the conversion from PDAG to CPDAG, which is applied after each application of an operator.
-   - `test_utils.py`: tests the other auxiliary functions
+   - `test_utils.py`: tests the other auxiliary functions.
    - `ges.test.test_vs_pcalg`: compares the output of the algorithm vs. that of `pcalg` for randomly generated graphs.
 
 ## Feedback

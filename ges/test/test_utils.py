@@ -42,7 +42,7 @@ import ges.utils
 
 #---------------------------------------------------------------------
 # Tests
-# TODO: Adapt tests to A[i,j] != 0 => i -> j
+
 class UtilsTests(unittest.TestCase):
 
     # ------------------------

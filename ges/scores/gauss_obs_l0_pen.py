@@ -38,8 +38,35 @@ from .decomposable_score import DecomposableScore
 # l0-penalized Gaussian log-likelihood score for a sample from a single
 # (observational) environment
 class GaussObsL0Pen(DecomposableScore):
-    
+    """
+    Implements a cached l0-penalized gaussian likelihood score.
+
+    """
     def __init__(self, data, lmbda=None, method='scatter', cache=True, debug=0):
+        """Creates a new instance of the class.
+
+        Parameters
+        ----------
+        data : np.array
+            the nxp matrix containing the observations of each
+            variable (each column corresponds to a variable).
+        lmbda : float or NoneType, optional
+            the regularization parameter. If None, defaults to the BIC
+            score, i.e. lmbda = 1/2 * log(n), where n is the number of
+            observations.
+        method : {'scatter', 'raw'}, optional
+            the method used to compute the likelihood. If 'scatter',
+            the empirical covariance matrix (i.e. scatter matrix) is
+            used. If 'raw', the likelihood is computed from the raw
+            data. In both cases an intercept is fitted.
+        cache : bool, optional
+           if computations of the local score should be cached for
+           future calls. Defaults to True.
+        debug : int, optional
+            if larger than 0, debug are traces printed. Higher values
+            correspond to increased verbosity.
+        
+        """
         if type(data) != np.ndarray:
             raise ValueError("Provided data has the wrong format, type(data)=%s" % type(data))
 
@@ -67,12 +94,12 @@ class GaussObsL0Pen(DecomposableScore):
         Parameters
         ----------
         A : np.array
-            The adjacency matrix of a DAG, where A[i,j] != 0 => i -> j
+            The adjacency matrix of a DAG, where A[i,j] != 0 => i -> j.
 
         Returns
         -------
         score : float
-            the penalized log-likelihood score
+            the penalized log-likelihood score.
 
         """
         # Compute MLE
@@ -100,14 +127,14 @@ class GaussObsL0Pen(DecomposableScore):
         Parameters
         ----------
         x : int
-            a node
+            a node.
         pa : set of ints
-            the node's parents
+            the node's parents.
 
         Returns
         -------
         score : float
-            the penalized log-likelihood score
+            the penalized log-likelihood score.
 
         """
         pa = list(pa)
@@ -126,6 +153,25 @@ class GaussObsL0Pen(DecomposableScore):
     #  weights/variances
 
     def _mle_full(self, A):
+        """
+        Finds the maximum likelihood estimate for the whole graph,
+        specified by the adjacency A.
+
+        Parameters
+        ----------
+        A : np.array
+            The adjacency matrix of a DAG, where A[i,j] != 0 => i -> j.
+        
+        Returns
+        -------
+        B : np.array
+            the connectivity (weights) matrix, which respects the
+            adjacency in A.
+        omegas : np.array
+            the estimated noise-term variances of the observed
+            variables.
+
+        """
         B = np.zeros(A.shape)
         omegas = np.zeros(self.p)
         for j in range(self.p):
@@ -134,6 +180,25 @@ class GaussObsL0Pen(DecomposableScore):
         return B, omegas
 
     def _mle_local(self, j, parents):
+        """Finds the maximum likelihood estimate of the local model
+        between a node and its parents.
+
+        Parameters
+        ----------
+        x : int
+            a node.
+        pa : set of ints
+            the node's parents.
+
+        Returns
+        -------
+        b : np.array
+            an array of size p, with the estimated weights from the
+            parents to the node, and zeros for non-parent variables.
+        sigma : float
+            the estimate noise-term variance of variable x
+
+        """
         parents = list(parents)
         b = np.zeros(self.p)
         # Compute the regression coefficients from a least squares

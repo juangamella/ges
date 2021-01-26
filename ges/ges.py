@@ -63,15 +63,6 @@ import numpy as np
 import ges.utils as utils
 from ges.scores.gauss_obs_l0_pen import GaussObsL0Pen
 
-# TODO: Rubber duck turning logic and semi_directed_paths
-# TODO: Raise exception if x or y are contained in H or T
-# TODO: Write README & requirements
-# TODO: Finish documenting all functions
-# TODO: Update research utils with new changes
-# TODO: Update sempler.utils version of matrix_block
-# Done TODO: ASSUME DATA IS CENTERED
-# Done, decided to keep old behaviour; TODO: If condition 1 does not pass for an operator, do not check condition 2
-
 def fit_bic(data, A0 = None, phases = ['forward', 'backward', 'turning'], debug = 0):
     """
     Run GES on the given data, using the Gaussian BIC score

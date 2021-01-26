@@ -10,7 +10,7 @@ You can clone this repo or install the python package via pip:
 pip install ges
 ```
 
-The _only_ dependency outside the Python Standard Library is `numpy`. See [`requirements.txt`](requirements.txt) for more details.
+The _only_ dependency outside the Python Standard Library is `numpy>=1.15.0`. See [`requirements.txt`](requirements.txt) for more details.
 
 ## When you should (and shouldn't) use this implementation
 
@@ -19,7 +19,7 @@ To the best of my knowledge, the only other public implementation of GES is in t
 Thus, **this implementation might be for you if**:
 
 - you want a dependency-light implementation (the only dependency outside the Python Standard Library is numpy), or
-- you want to rewrite parts of GES for your own research, but you'd rather do it in Python. The code has been written with an emphasis on readability, and everything is thoroughly documented and properly referenced back to the [GES](https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf)/[GIES](https://www.jmlr.org/papers/volume13/hauser12a/hauser12a.pdf) papers.
+- you want to rewrite parts of GES for your own research, but you'd rather do it in Python. The code has been written with an emphasis on readability, and everything is thoroughly documented and referenced back to the [GES](https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf)/[GIES](https://www.jmlr.org/papers/volume13/hauser12a/hauser12a.pdf) papers.
 
 **You should not use this implementation if:**
 
@@ -28,9 +28,9 @@ Thus, **this implementation might be for you if**:
 
 ## Running the algorithm
 
-### Using the gaussian BIC score: `ges.fit_bic`
+### Using the Gaussian BIC score: `ges.fit_bic`
 
-This is the variant which is normally found in the literature, and the one which was implemented in the original paper. It is made available under the function `ges.fit_bic`.
+GES comes ready to use with the [Gaussian BIC score](https://en.wikipedia.org/wiki/Bayesian_information_criterion#Gaussian_special_case), i.e. the l0-penalized Gaussian likelihood score. This is the variant which is normally found in the literature, and the one which was implemented in the original paper. It is made available under the function `ges.fit_bic`.
 
 ```python
 ges.fit_bic(data, A0 = None, phases = ['forward', 'backward', 'turning'], debug = 0)
@@ -65,7 +65,7 @@ A = np.array([[0, 0, 1, 0, 0],
 W = A * np.random.uniform(1, 2, A.shape) # sample weights
 data = sempler.LGANM(W,(1,2), (1,2)).sample(n=5000)
 
-# Run GES with the gaussian BIC score
+# Run GES with the Gaussian BIC score
 estimate, score = ges.fit_bic(data)
 
 print(estimate, score)
@@ -80,7 +80,7 @@ print(estimate, score)
 
 ### Using a custom score: `ges.fit`
 
-While [Chickering (2002)](https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf) chose the BIC score because of consistency, any score equivalent and locally decomposable function is adequate. To run with another score of your choice, you can use
+While [Chickering (2002)](https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf) chose the BIC score, any score-equivalent and locally decomposable function is adequate. To run with another score of your choice, you can use
 
 ```python
 ges.fit(score_class, A0 = None, phases = ['forward', 'backward', 'turning'], debug = 0)
@@ -121,7 +121,7 @@ data = sempler.LGANM(W,(1,2), (1,2)).sample(n=5000)
 # Define the score class
 score_class = ges.scores.GaussObsL0Pen(data)
 
-# Run GES with the gaussian BIC score
+# Run GES with the Gaussian BIC score
 estimate, score = ges.fit(score_class)
 
 print(estimate, score)
@@ -142,7 +142,7 @@ All the modules can be found inside the `ges/` directory. These include:
   - `ges.utils` contains auxiliary functions and the logic to transform a PDAG into a CPDAG, used after each application of an operator.
   - `ges.scores` contains the modules with the score classes:
       - `ges.scores.decomposable_score` contains the base class for decomposable score classes (see that module for more details).
-      - `ges.scores.gauss_obs_l0_pen` contains an implementation of the cached gaussian BIC score, as used in the original GES paper.
+      - `ges.scores.gauss_obs_l0_pen` contains an implementation of the cached Gaussian BIC score, as used in the original GES paper.
    - `ges.test` contains the modules with the unit tests and tests comparing against the algorithm's implementation in the 'pcalg' package.   
 
 ## Tests
@@ -156,7 +156,7 @@ The tests can be run with `make test`. You can add `SUITE=<module_name>` to run 
 They are in the sub package `ges.test`, in the directory `ges/test/`:
 
    - `test_decomposable_score.py`: tests for the decomposable score base class.
-   - `test_gauss_bic.py`: tests for the gaussian bic score.
+   - `test_gauss_bic.py`: tests for the Gaussian bic score.
    - `test_operators.py`: tests for the insert, delete and turn operators.
    - `test_pdag_to_cpdag.py`: tests the conversion from PDAG to CPDAG, which is applied after each application of an operator.
    - `test_utils.py`: tests the other auxiliary functions

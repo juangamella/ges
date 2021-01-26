@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='ges',
-    version='0.0.1',
+    version='1.0.0',
     author='Juan L Gamella',
     author_email='juangamella@gmail.com',
     packages=['ges', 'ges.test', 'ges.scores'],

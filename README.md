@@ -10,7 +10,7 @@ You can clone this repo or install the python package via pip:
 pip install ges
 ```
 
-The _only_ dependency outside the Python Standard Library is `numpy`. See [`requirements.txt`](requirements.txt) for more details.
+The _only_ dependency outside the Python Standard Library is `numpy>=1.15.0`. See [`requirements.txt`](requirements.txt) for more details.
 
 ## When you should (and shouldn't) use this implementation
 

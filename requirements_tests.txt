@@ -1,5 +1,5 @@
 # R requirements for the tests are in R_requirements_tests.txt
-numpy
+numpy>=1.15.0
 sempler
 causaldag
 # For CDT

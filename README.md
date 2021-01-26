@@ -80,7 +80,7 @@ print(estimate, score)
 
 ### Using a custom score: `ges.fit`
 
-While [Chickering (2002)](https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf) chose the BIC score because of consistency, any score equivalent and locally decomposable function is adequate. To run with another score of your choice, you can use
+While [Chickering (2002)](https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf) chose the BIC score, any score-equivalent and locally decomposable function is adequate. To run with another score of your choice, you can use
 
 ```python
 ges.fit(score_class, A0 = None, phases = ['forward', 'backward', 'turning'], debug = 0)

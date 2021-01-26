@@ -35,8 +35,9 @@ computing local scores.
 
 NOTE: It is not mandatory to inherit this class when developing custom
 scores to use with the GES implementation in ges.py. The only
-requirement is that the class defines the local_score function (see
-below).
+requirement is that the class defines:
+  1. the local_score function (see below),
+  2. an attribute "p" for the total number of variables.
 
 """
 
@@ -51,6 +52,7 @@ class DecomposableScore():
         self._data = copy.deepcopy(data)
         self._cache = {} if cache else None
         self._debug = debug
+        self.p = None
             
     def local_score(self, x, pa):
         """

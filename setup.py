@@ -7,9 +7,9 @@ setup(
     author_email='juangamella@gmail.com',
     packages=['ges', 'ges.test', 'ges.scores'],
     scripts=[],
-    url='http://pypi.python.org/pypi/ges/',
+    url='http://https://github.com/juangamella/ges',
     license='LICENSE.txt',
     description='Python implementation of the GES algorithm for causal discovery',
-    long_description=open('README.txt').read(),
+    long_description=open('README_pypi.md').read(),
     install_requires=['numpy>=1.15.0']
 )

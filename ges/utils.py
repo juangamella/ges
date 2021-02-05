@@ -875,8 +875,8 @@ def member(L, A):
     return None
 
 def delete(array, mask, axis=None):
-    """
-    Wrapper for numpy.delete, which adapts the call depending on the numpy version (the API changed on 1.19.0)
+    """Wrapper for numpy.delete, which adapts the call depending on the
+    numpy version (the API changed on 1.19.0)
 
     Parameters
     ----------

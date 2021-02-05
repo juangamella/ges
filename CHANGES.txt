@@ -1,2 +1,3 @@
-v1.0.1, 2020-04-24 -- Fixed project url and license on setup.py, added changelog.
-v1.0.0, 2020-04-24 -- Initial release.
+v1.0.2, 2021-02-05 -- Adapted testing code to new sempler version 0.2.0.
+v1.0.1, 2021-01-24 -- Fixed project url and license on setup.py, added changelog.
+v1.0.0, 2021-01-24 -- Initial release.

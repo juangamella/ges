@@ -33,7 +33,7 @@
 
 import unittest
 import numpy as np
-import sempler
+import sempler, sempler.generators
 
 import ges.utils as utils
 import ges.ges
@@ -49,7 +49,7 @@ class InsertOperatorTests(unittest.TestCase):
                        [0, 0, 0, 0, 0]])
     factorization = [(4, (2,3)), (3, (2,)), (2, (0,1)), (0, ()), (1, ())]
     true_B = true_A * np.random.uniform(1,2, size=true_A.shape)
-    scm = sempler.LGANM(true_B, (0.3,0.4), (0,0))
+    scm = sempler.LGANM(true_B, (0,0), (0.3,0.4))
     p = len(true_A)
     n = 10000
     obs_data = scm.sample(n = n)
@@ -112,7 +112,7 @@ class InsertOperatorTests(unittest.TestCase):
         G = 100
         p = 20
         for i in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             cpdag = utils.dag_to_cpdag(A)
             for x in range(p):
                 # Can only apply the operator to non-adjacent nodes
@@ -380,7 +380,7 @@ class DeleteOperatorTests(unittest.TestCase):
                        [0, 0, 0, 0, 0]])
     factorization = [(4, (2,3)), (3, (2,)), (2, (0,1)), (0, ()), (1, ())]
     true_B = true_A * np.random.uniform(1,2, size=true_A.shape)
-    scm = sempler.LGANM(true_B, (0.3,0.4), (0,0))
+    scm = sempler.LGANM(true_B, (0,0), (0.3,0.4))
     p = len(true_A)
     n = 10000
     obs_data = scm.sample(n = n)
@@ -494,7 +494,7 @@ class DeleteOperatorTests(unittest.TestCase):
         G = 100
         p = 20
         for i in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             cpdag = utils.dag_to_cpdag(A)
             for x in range(p):
                 # Can only apply the operator to X -> Y or X - Y
@@ -596,10 +596,10 @@ class DeleteOperatorTests(unittest.TestCase):
         G = 100
         p = 20
         for i in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             cpdag = utils.dag_to_cpdag(A)
             W = A * np.random.uniform(1,2,A.shape)
-            obs_sample = sempler.LGANM(W, (0.5,1)).sample(n=1000)
+            obs_sample = sempler.LGANM(W, (0,0), (0.5,1)).sample(n=1000)
             cache = GaussObsL0Pen(obs_sample)
             fro,to = np.where(utils.only_undirected(cpdag))
             # Test the operator to all undirected edges
@@ -678,7 +678,7 @@ class TurnOperatorTests(unittest.TestCase):
                        [0, 0, 0, 0, 0]])
     factorization = [(4, (2,3)), (3, (2,)), (2, (0,1)), (0, ()), (1, ())]
     true_B = true_A * np.random.uniform(1,2, size=true_A.shape)
-    scm = sempler.LGANM(true_B, (0.3,0.4), (0,0))
+    scm = sempler.LGANM(true_B, (0,0), (0.3,0.4))
     p = len(true_A)
     n = 10000
     obs_data = scm.sample(n = n)
@@ -973,10 +973,10 @@ class TurnOperatorTests(unittest.TestCase):
         G = 10
         p = 20
         for i in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             cpdag = utils.dag_to_cpdag(A)
             W = A * np.random.uniform(1,2,A.shape)
-            obs_sample = sempler.LGANM(W, (0.5,1)).sample(n=1000)
+            obs_sample = sempler.LGANM(W, (0,0), (0.5,1)).sample(n=1000)
             cache = GaussObsL0Pen(obs_sample)
             fro,to = np.where(cpdag != 0)
             for (x,y) in zip(to,fro):

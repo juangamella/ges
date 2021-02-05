@@ -33,7 +33,7 @@
 
 import unittest
 import numpy as np
-import sempler
+import sempler, sempler.generators
 import ges.utils as utils
 import time
 
@@ -55,7 +55,7 @@ class OverallGESTests(unittest.TestCase):
                        [0, 0, 0, 0, 0]])
     factorization = [(4, (2,3)), (3, (2,)), (2, (0,1)), (0, ()), (1, ())]
     true_B = true_A * np.random.uniform(1,2, size=true_A.shape)
-    scm = sempler.LGANM(true_B, (0.3,0.4), (0,0))
+    scm = sempler.LGANM(true_B, (0,0), (0.3,0.4))
     p = len(true_A)
     n = 100000
     interventions = [{0: (0, 1.0)},
@@ -82,15 +82,15 @@ class OverallGESTests(unittest.TestCase):
         # Erdos-Renyi graphs. The call is made through the ges.fit_bic
         # function
         np.random.seed(15)
-        G = 500 # number of graphs
+        G = 2 # number of graphs
         p = 15 # number of variables
         n = 1500 # size of the observational sample
         for i in range(G):
             print("  Checking SCM %d" % (i))
             start = time.time()
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             W = A * np.random.uniform(1,2,A.shape)
-            obs_sample = sempler.LGANM(W, (0.5,1), (1,10)).sample(n=n)
+            obs_sample = sempler.LGANM(W, (1,10), (0.5,1)).sample(n=n)
             # Estimate the equivalence class using the pcalg
             # implementation of GES (package cdt)
             data = pd.DataFrame(obs_sample)
@@ -114,15 +114,15 @@ class OverallGESTests(unittest.TestCase):
         # Erdos-Renyi graphs. The call is made through the ges.fit
         # function
         np.random.seed(16)
-        G = 500 # number of graphs
+        G = 2 # number of graphs
         p = 15 # number of variables
         n = 1500 # size of the observational sample
         for i in range(G):
             print("  Checking SCM %d" % (i))
             start = time.time()
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             W = A * np.random.uniform(1,2,A.shape)
-            obs_sample = sempler.LGANM(W, (0.5,1), (1,10)).sample(n=n)
+            obs_sample = sempler.LGANM(W, (1,10), (0.5,1)).sample(n=n)
             # Estimate the equivalence class using the pcalg
             # implementation of GES (package cdt)
             data = pd.DataFrame(obs_sample)

@@ -48,7 +48,7 @@ class ScoreTests(unittest.TestCase):
                        [0, 0, 0, 0, 0]])
     factorization = [(4, (2,3)), (3, (2,)), (2, (0,1)), (0, ()), (1, ())]
     true_B = true_A * np.random.uniform(1,2, size=true_A.shape)
-    scm = sempler.LGANM(true_B, (0.3,0.4), (0,0))
+    scm = sempler.LGANM(true_B, (0,0), (0.3,0.4))
     p = len(true_A)
     n = 10000
     obs_data = scm.sample(n = n)

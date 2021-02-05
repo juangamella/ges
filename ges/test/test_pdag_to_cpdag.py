@@ -33,7 +33,7 @@
 
 import unittest
 import numpy as np
-import sempler
+import sempler, sempler.generators
 import ges.utils as utils
 import causaldag as cd # to obtain cpdag from dag
 
@@ -110,7 +110,7 @@ class PDAG_to_CPDAG_Tests(unittest.TestCase):
         G = 500
         p = 20
         for i in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             cpdag = utils.dag_to_cpdag(A)
             self.assertTrue(utils.is_consistent_extension(A, cpdag))
             extension = ges.utils.pdag_to_dag(cpdag, debug=False)
@@ -170,7 +170,7 @@ class PDAG_to_CPDAG_Tests(unittest.TestCase):
         G = 500
         p = 20
         for i in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             ordered = ges.utils.order_edges(A)
             no_edges = (A != 0).sum()
             self.assertEqual(sorted(ordered[ordered != 0]), list(range(1,no_edges+1)))
@@ -236,7 +236,7 @@ class PDAG_to_CPDAG_Tests(unittest.TestCase):
         G = 500
         p = 20
         for i in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             # Construct expected output
             cpdag = utils.dag_to_cpdag(A)
             undirected = np.logical_and(cpdag, cpdag.T)
@@ -254,7 +254,7 @@ class PDAG_to_CPDAG_Tests(unittest.TestCase):
         G = 500
         p = 25
         for i in range(G):
-            A = sempler.dag_avg_deg(p,4,1,1)
+            A = sempler.generators.dag_avg_deg(p,4,1,1)
             truth = utils.dag_to_cpdag(A)
             # Run and assert
             cpdag = ges.utils.dag_to_cpdag(A)
@@ -267,7 +267,7 @@ class PDAG_to_CPDAG_Tests(unittest.TestCase):
         G = 500
         p = 30
         for i in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             cpdag = utils.dag_to_cpdag(A)
             # Run and assert
             output = ges.utils.pdag_to_cpdag(cpdag)
@@ -280,7 +280,7 @@ class PDAG_to_CPDAG_Tests(unittest.TestCase):
         G = 500
         p = 32
         for g in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             # Construct PDAG by undirecting random edges which do not
             # belong to a v-structure.
             # NOTE: I'm proceeding in this awkward way to avoid

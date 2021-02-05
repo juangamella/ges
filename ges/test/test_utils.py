@@ -34,7 +34,7 @@ Tests for the research.utils module
 
 import unittest
 import numpy as np
-import sempler
+import sempler, sempler.generators
 import itertools
 import networkx as nx
 
@@ -116,7 +116,7 @@ class UtilsTests(unittest.TestCase):
         G = 100
         p = 30
         for i in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             ordering = ges.utils.topological_ordering(A)
             fro,to = np.where(A != 0)
             # Test that the ordering is correct, i.e. for every edge x
@@ -319,7 +319,7 @@ class UtilsTests(unittest.TestCase):
         G = 100
         p = 30
         for i in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             cpdag = ges.utils.pdag_to_cpdag(A)
             G = nx.from_numpy_matrix(cpdag, create_using=nx.DiGraph)
             for (x,y) in itertools.combinations(range(p),2):
@@ -660,7 +660,7 @@ class UtilsTests(unittest.TestCase):
         G = 500
         p = 20
         for i in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             cpdag = ges.utils.dag_to_cpdag(A)
             for j in range(p):
                 chain_component = ges.utils.chain_component(j, cpdag)
@@ -673,7 +673,7 @@ class UtilsTests(unittest.TestCase):
         G = 500
         p = 20
         for i in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             for j in range(p):
                 self.assertEqual({j}, ges.utils.chain_component(j, A))
 
@@ -685,7 +685,7 @@ class UtilsTests(unittest.TestCase):
         G = 500
         p = 20
         for i in range(G):
-            A = sempler.dag_avg_deg(p,3,1,1)
+            A = sempler.generators.dag_avg_deg(p,3,1,1)
             G = ges.utils.dag_to_cpdag(A)
             # Test 1
             self.assertTrue((np.zeros_like(G) == ges.utils.induced_subgraph(set(), G)).all())

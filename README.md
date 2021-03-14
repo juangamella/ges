@@ -23,7 +23,7 @@ Thus, **this implementation might be for you if**:
 
 **You should not use this implementation if:**
 
-- you have no interest in modifying GES itself, and
+- you have no interest in modifying GES itself, *and*
 - you care about speed, as the `pcalg` implementation is highly optimized and is **very** fast.
 
 ## Running the algorithm

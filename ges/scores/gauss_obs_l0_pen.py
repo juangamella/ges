@@ -37,11 +37,14 @@ from .decomposable_score import DecomposableScore
 # --------------------------------------------------------------------
 # l0-penalized Gaussian log-likelihood score for a sample from a single
 # (observational) environment
+
+
 class GaussObsL0Pen(DecomposableScore):
     """
     Implements a cached l0-penalized gaussian likelihood score.
 
     """
+
     def __init__(self, data, lmbda=None, method='scatter', cache=True, debug=0):
         """Creates a new instance of the class.
 
@@ -65,17 +68,17 @@ class GaussObsL0Pen(DecomposableScore):
         debug : int, optional
             if larger than 0, debug are traces printed. Higher values
             correspond to increased verbosity.
-        
+
         """
         if type(data) != np.ndarray:
             raise ValueError("Provided data has the wrong format, type(data)=%s" % type(data))
 
         super().__init__(data, cache=cache, debug=debug)
-        
+
         self.n, self.p = data.shape
         self.lmbda = 0.5 * np.log(self.n) if lmbda is None else lmbda
         self.method = method
-        
+
         # Precompute scatter matrices if necessary
         if method == 'scatter':
             self._scatter = np.cov(data, rowvar=False, ddof=0)
@@ -103,20 +106,20 @@ class GaussObsL0Pen(DecomposableScore):
 
         """
         # Compute MLE
-        B,omegas = self._mle_full(A)
+        B, omegas = self._mle_full(A)
         # Compute log-likelihood (without log(2π) term)
-        K = np.diag(1/omegas)
-        det_K = np.prod(1/omegas)
+        K = np.diag(1 / omegas)
+        det_K = np.prod(1 / omegas)
         I_B = np.eye(self.p) - B.T
         likelihood = 0.5 * self.n * (np.log(det_K) - np.trace(K @ I_B @ self._scatter @ I_B.T))
         #   Note: the number of parameters is the number of edges + the p marginal variances
-        l0_term = self.lmbda * (np.sum(A != 0) + 1*self.p)
+        l0_term = self.lmbda * (np.sum(A != 0) + 1 * self.p)
         score = likelihood - l0_term
-        return score    
+        return score
 
     # Note: self.local_score(...), with cache logic, already defined
     # in parent class DecomposableScore.
-    
+
     def _compute_local_score(self, x, pa):
         """
         Given a node and its parents, return the local l0-penalized
@@ -141,13 +144,13 @@ class GaussObsL0Pen(DecomposableScore):
         # Compute MLE
         b, sigma = self._mle_local(x, pa)
         # Compute log-likelihood (without log(2π) term)
-        likelihood = -0.5*self.n*( 1 + np.log(sigma))
+        likelihood = -0.5 * self.n * (1 + np.log(sigma))
         #  Note: the number of parameters is the number of parents (one
         #  weight for each) + the marginal variance of x
         l0_term = self.lmbda * (len(pa) + 1)
         score = likelihood - l0_term
         return score
-    
+
     # --------------------------------------------------------------------
     #  Functions for the maximum likelihood estimation of the
     #  weights/variances
@@ -161,7 +164,7 @@ class GaussObsL0Pen(DecomposableScore):
         ----------
         A : np.array
             The adjacency matrix of a DAG, where A[i,j] != 0 => i -> j.
-        
+
         Returns
         -------
         B : np.array
@@ -175,8 +178,8 @@ class GaussObsL0Pen(DecomposableScore):
         B = np.zeros(A.shape)
         omegas = np.zeros(self.p)
         for j in range(self.p):
-            parents = np.where(A[:,j] != 0)[0]
-            B[:,j], omegas[j] = self._mle_local(j, parents)
+            parents = np.where(A[:, j] != 0)[0]
+            B[:, j], omegas[j] = self._mle_local(j, parents)
         return B, omegas
 
     def _mle_local(self, j, parents):
@@ -204,18 +207,18 @@ class GaussObsL0Pen(DecomposableScore):
         # Compute the regression coefficients from a least squares
         # regression on the raw data
         if self.method == 'raw':
-            X = np.atleast_2d(self.data[:, parents + [self.p]]) # [p] for the intercept
-            Y = data[:,j]
+            X = np.atleast_2d(self.data[:, parents + [self.p]])  # [p] for the intercept
+            Y = self.data[:, j]
             # Perform regression
-            coef = np.linalg.lstsq(X,Y, rcond=None)
+            coef = np.linalg.lstsq(X, Y, rcond=None)
             b[parents] = coef[:-1]
-            #intercept = coef[-1]
-            sigma = np.var(y - X @ coef)
+            # intercept = coef[-1]
+            sigma = np.var(Y - X @ coef)
         # Or compute the regression coefficients from the
         # empirical covariance (scatter) matrix
         # i.e. b = Σ_{j,pa(j)} @ Σ_{pa(j), pa(j)}^-1
         elif self.method == 'scatter':
-            sigma = self._scatter[j,j]
+            sigma = self._scatter[j, j]
             if len(parents) > 0:
                 cov_parents = self._scatter[parents, :][:, parents]
                 cov_j = self._scatter[j, parents]

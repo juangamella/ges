@@ -29,6 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 """
+Test the DecomposableScore class.
 """
 
 import unittest
@@ -37,16 +38,20 @@ import numpy as np
 from ges.scores.decomposable_score import DecomposableScore
 
 # Class to to test cache behaviour
+
+
 class TestScore(DecomposableScore):
     def _compute_local_score(self, x, pa):
         return np.random.uniform()
 
 # Tests for the decomposable score class
-class DecomposableScoreTests(unittest.TestCase):    
+
+
+class DecomposableScoreTests(unittest.TestCase):
 
     def test_initialization(self):
-        p,n = 10,1000
-        data = np.random.uniform(size=(n,p))
+        p, n = 10, 1000
+        data = np.random.uniform(size=(n, p))
 
         # Test 1
         score = DecomposableScore(data, False, False)
@@ -54,21 +59,21 @@ class DecomposableScoreTests(unittest.TestCase):
         self.assertEqual(score._debug, False)
         self.assertFalse(data is score._data)
         self.assertTrue((data == score._data).all())
-        
+
         # Test 2
         score = DecomposableScore(data, False, True)
         self.assertIsNone(score._cache)
         self.assertEqual(score._debug, True)
         self.assertFalse(data is score._data)
         self.assertTrue((data == score._data).all())
-        
+
         # Test 3
         score = DecomposableScore(data, True, False)
         self.assertIsNotNone(score._cache)
         self.assertEqual(score._debug, False)
         self.assertFalse(data is score._data)
         self.assertTrue((data == score._data).all())
-        
+
         # Test 4
         score = DecomposableScore(data, True, True)
         self.assertIsNotNone(score._cache)
@@ -77,31 +82,31 @@ class DecomposableScoreTests(unittest.TestCase):
         self.assertTrue((data == score._data).all())
 
         # Double-check memory leaks
-        data[0,0] = 99
+        data[0, 0] = 99
         self.assertFalse((data == score._data).all())
 
     def test_api(self):
         score = DecomposableScore(None, True, True)
         score.local_score(0, {})
         score.p
-        
+
     def test_cache_on(self):
         data = None
         score = TestScore(data, cache=True, debug=0)
         # Make some calls to local_score
         items = []
         for i in range(5):
-            choice = np.random.choice(range(10), replace=False, size=i+1)
+            choice = np.random.choice(range(10), replace=False, size=i + 1)
             x = choice[0]
             pa = choice[1:]
-            items.append((x,pa,score.local_score(x,pa)))
+            items.append((x, pa, score.local_score(x, pa)))
         # With the cache turned on, the call to local_score should
         # always return the same value (see
         # TestScore._compute_local_score)
         for item in items:
             x, pa, previous_score = item
-            #print(previous_score, score.local_score(x,pa))
-            self.assertEqual(previous_score, score.local_score(x,pa))
+            # print(previous_score, score.local_score(x,pa))
+            self.assertEqual(previous_score, score.local_score(x, pa))
         self.assertEqual(5, len(score._cache))
 
     def test_cache_off(self):
@@ -110,16 +115,15 @@ class DecomposableScoreTests(unittest.TestCase):
         # Make some calls to local_score
         items = []
         for i in range(5):
-            choice = np.random.choice(range(10), replace=False, size=i+1)
+            choice = np.random.choice(range(10), replace=False, size=i + 1)
             x = choice[0]
             pa = choice[1:]
-            items.append((x,pa,score.local_score(x,pa)))
+            items.append((x, pa, score.local_score(x, pa)))
         self.assertIsNone(score._cache)
         # With the cache turned on, the call to local_score should
         # always return the a different value (see
         # TestScore._compute_local_score)
         for item in items:
             x, pa, previous_score = item
-            #print(previous_score, score.local_score(x,pa))
-            self.assertNotEqual(previous_score, score.local_score(x,pa))
-
+            # print(previous_score, score.local_score(x,pa))
+            self.assertNotEqual(previous_score, score.local_score(x, pa))

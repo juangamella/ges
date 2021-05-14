@@ -34,24 +34,25 @@
 import unittest
 import numpy as np
 import sempler
-import ges.utils as utils
 
 from ges.scores.gauss_obs_l0_pen import GaussObsL0Pen
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # Tests for the l0-penalized scores
+
+
 class ScoreTests(unittest.TestCase):
     true_A = np.array([[0, 0, 1, 0, 0],
                        [0, 0, 1, 0, 0],
                        [0, 0, 0, 1, 1],
                        [0, 0, 0, 0, 1],
                        [0, 0, 0, 0, 0]])
-    factorization = [(4, (2,3)), (3, (2,)), (2, (0,1)), (0, ()), (1, ())]
-    true_B = true_A * np.random.uniform(1,2, size=true_A.shape)
-    scm = sempler.LGANM(true_B, (0,0), (0.3,0.4))
+    factorization = [(4, (2, 3)), (3, (2,)), (2, (0, 1)), (0, ()), (1, ())]
+    true_B = true_A * np.random.uniform(1, 2, size=true_A.shape)
+    scm = sempler.LGANM(true_B, (0, 0), (0.3, 0.4))
     p = len(true_A)
     n = 10000
-    obs_data = scm.sample(n = n)
+    obs_data = scm.sample(n=n)
     obs_score = GaussObsL0Pen(obs_data)
 
     # ------------------------------------------------------
@@ -64,8 +65,8 @@ class ScoreTests(unittest.TestCase):
         # passing a subgraph to GaussObsL0Pen._mle_full
         local_B = np.zeros_like(self.true_B)
         local_omegas = np.zeros(self.p)
-        for (x,pa) in self.factorization:
-            local_B[:,x], local_omegas[x] = self.obs_score._mle_local(x, pa)
+        for (x, pa) in self.factorization:
+            local_B[:, x], local_omegas[x] = self.obs_score._mle_local(x, pa)
         full_B, full_omegas = self.obs_score._mle_full(self.true_A)
         print("Locally estimated", local_B, local_omegas)
         print("Fully estimated", full_B, full_omegas)
@@ -89,7 +90,7 @@ class ScoreTests(unittest.TestCase):
     #   functions to compute the full/local
     #   observational/interventional BIC scores from a given DAG
     #   structure and the data
-        
+
     def test_parameters_obs(self):
         # Fails if data is not ndarray
         try:
@@ -97,9 +98,9 @@ class ScoreTests(unittest.TestCase):
             self.fail()
         except ValueError:
             pass
-        except e:
+        except Exception:
             self.fail()
-        
+
     def test_full_score_obs(self):
         # Verify that the true adjacency yields a higher score than the empty graph
         # Compute score of true adjacency
@@ -116,9 +117,9 @@ class ScoreTests(unittest.TestCase):
         print("Decomposability of observational score")
         full_score = self.obs_score.full_score(self.true_A)
         acc = 0
-        for (j,pa) in self.factorization:
+        for (j, pa) in self.factorization:
             local_score = self.obs_score.local_score(j, pa)
-            print("  ",j,pa,local_score)
+            print("  ", j, pa, local_score)
             acc += local_score
         print("Full vs. acc:", full_score, acc)
         self.assertAlmostEqual(full_score, acc, places=2)

@@ -42,6 +42,7 @@ from ges.scores.gauss_obs_l0_pen import GaussObsL0Pen
 
 
 class ScoreTests(unittest.TestCase):
+    np.random.seed(12)
     true_A = np.array([[0, 0, 1, 0, 0],
                        [0, 0, 1, 0, 0],
                        [0, 0, 0, 1, 1],
@@ -54,6 +55,7 @@ class ScoreTests(unittest.TestCase):
     n = 10000
     obs_data = scm.sample(n=n)
     obs_score = GaussObsL0Pen(obs_data)
+    obs_score_raw = GaussObsL0Pen(obs_data, method='raw')
 
     # ------------------------------------------------------
     # White-box tests:
@@ -63,26 +65,28 @@ class ScoreTests(unittest.TestCase):
     def test_mle_obs(self):
         # Check that the parameters are correctly estimated when
         # passing a subgraph to GaussObsL0Pen._mle_full
-        local_B = np.zeros_like(self.true_B)
-        local_omegas = np.zeros(self.p)
-        for (x, pa) in self.factorization:
-            local_B[:, x], local_omegas[x] = self.obs_score._mle_local(x, pa)
-        full_B, full_omegas = self.obs_score._mle_full(self.true_A)
-        print("Locally estimated", local_B, local_omegas)
-        print("Fully estimated", full_B, full_omegas)
-        print("Truth", self.true_B, self.scm.variances)
-        # Make sure zeros are respected
-        self.assertTrue((local_B[self.true_A == 0] == 0).all())
-        self.assertTrue((full_B[self.true_A == 0] == 0).all())
-        # Make sure estimation of weights is similar
-        self.assertTrue((local_B == full_B).all())
-        # Make sure estimation of noise variances is similar
-        self.assertTrue((local_omegas == full_omegas).all())
-        # Compare with true model
-        self.assertTrue(np.allclose(self.true_B, local_B, atol=5e-2))
-        self.assertTrue(np.allclose(self.true_B, full_B, atol=5e-2))
-        self.assertTrue(np.allclose(self.scm.variances, local_omegas, atol=1e-1))
-        self.assertTrue(np.allclose(self.scm.variances, full_omegas, atol=1e-1))
+        for score in [self.obs_score, self.obs_score_raw]:
+            print("Testing %s" % score)
+            local_B = np.zeros_like(self.true_B)
+            local_omegas = np.zeros(self.p)
+            for (x, pa) in self.factorization:
+                local_B[:, x], local_omegas[x] = score._mle_local(x, pa)
+            full_B, full_omegas = score._mle_full(self.true_A)
+            print("Locally estimated", local_B, local_omegas)
+            print("Fully estimated", full_B, full_omegas)
+            print("Truth", self.true_B, self.scm.variances)
+            # Make sure zeros are respected
+            self.assertTrue((local_B[self.true_A == 0] == 0).all())
+            self.assertTrue((full_B[self.true_A == 0] == 0).all())
+            # Make sure estimation of weights is similar
+            self.assertTrue((local_B == full_B).all())
+            # Make sure estimation of noise variances is similar
+            self.assertTrue((local_omegas == full_omegas).all())
+            # Compare with true model
+            self.assertTrue(np.allclose(self.true_B, local_B, atol=5e-2))
+            self.assertTrue(np.allclose(self.true_B, full_B, atol=5e-2))
+            self.assertTrue(np.allclose(self.scm.variances, local_omegas, atol=1e-1))
+            self.assertTrue(np.allclose(self.scm.variances, full_omegas, atol=1e-1))
 
     # ------------------------------------------------------
     # Black-box tests:
@@ -102,24 +106,28 @@ class ScoreTests(unittest.TestCase):
             self.fail()
 
     def test_full_score_obs(self):
-        # Verify that the true adjacency yields a higher score than the empty graph
-        # Compute score of true adjacency
-        true_score = self.obs_score.full_score(self.true_A)
-        self.assertIsInstance(true_score, float)
-        # Compute score of unconnected graph
-        score = self.obs_score.full_score(np.zeros((self.p, self.p)))
-        self.assertIsInstance(score, float)
-        self.assertGreater(true_score, score)
+        # Verify that the true adjacency yields a higher score than
+        # the empty graph Compute score of true adjacency
+        for score_fun in [self.obs_score, self.obs_score_raw]:
+            print("Testing %s" % score_fun)
+            true_score = score_fun.full_score(self.true_A)
+            self.assertIsInstance(true_score, float)
+            # Compute score of unconnected graph
+            score = score_fun.full_score(np.zeros((self.p, self.p)))
+            self.assertIsInstance(score, float)
+            self.assertGreater(true_score, score)
 
     def test_score_decomposability_obs(self):
         # As a black-box test, make sure the score functions
         # preserve decomposability
-        print("Decomposability of observational score")
-        full_score = self.obs_score.full_score(self.true_A)
-        acc = 0
-        for (j, pa) in self.factorization:
-            local_score = self.obs_score.local_score(j, pa)
-            print("  ", j, pa, local_score)
-            acc += local_score
-        print("Full vs. acc:", full_score, acc)
-        self.assertAlmostEqual(full_score, acc, places=2)
+        for score_fun in [self.obs_score, self.obs_score_raw]:
+            print("Decomposability of observational score")
+            print("Testing %s" % score_fun)
+            full_score = score_fun.full_score(self.true_A)
+            acc = 0
+            for (j, pa) in self.factorization:
+                local_score = score_fun.local_score(j, pa)
+                print("  ", j, pa, local_score)
+                acc += local_score
+            print("Full vs. acc:", full_score, acc)
+            self.assertAlmostEqual(full_score, acc, places=2)

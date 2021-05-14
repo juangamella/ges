@@ -83,7 +83,7 @@ class GaussObsL0Pen(DecomposableScore):
         if method == 'scatter':
             self._scatter = np.cov(data, rowvar=False, ddof=0)
         elif method == 'raw':
-            self.data = np.hstack([data, np.ones((self.n, 1))])
+            self._centered = data - np.mean(data, axis=0)
         else:
             raise ValueError('Unrecognized method "%s"' % method)
 
@@ -109,12 +109,21 @@ class GaussObsL0Pen(DecomposableScore):
         B, omegas = self._mle_full(A)
         # Compute log-likelihood (without log(2π) term)
         K = np.diag(1 / omegas)
-        det_K = np.prod(1 / omegas)
         I_B = np.eye(self.p) - B.T
-        likelihood = 0.5 * self.n * (np.log(det_K) - np.trace(K @ I_B @ self._scatter @ I_B.T))
+        log_term = self.n * np.log(omegas.prod())
+        if self.method == 'scatter':
+            # likelihood = 0.5 * self.n * (np.log(det_K) - np.trace(K @ I_B @ self._scatter @ I_B.T))
+            likelihood = log_term + self.n * np.trace(K @ I_B @ self._scatter @ I_B.T)
+        else:
+            # Center the data, exclude the intercept column
+            inv_cov = I_B.T @ K @ I_B
+            cov_term = 0
+            for i, x in enumerate(self._centered):
+                cov_term += x @ inv_cov @ x
+            likelihood = log_term + cov_term
         #   Note: the number of parameters is the number of edges + the p marginal variances
         l0_term = self.lmbda * (np.sum(A != 0) + 1 * self.p)
-        score = likelihood - l0_term
+        score = -0.5 * likelihood - l0_term
         return score
 
     # Note: self.local_score(...), with cache logic, already defined
@@ -207,13 +216,15 @@ class GaussObsL0Pen(DecomposableScore):
         # Compute the regression coefficients from a least squares
         # regression on the raw data
         if self.method == 'raw':
-            X = np.atleast_2d(self.data[:, parents + [self.p]])  # [p] for the intercept
-            Y = self.data[:, j]
-            # Perform regression
-            coef = np.linalg.lstsq(X, Y, rcond=None)
-            b[parents] = coef[:-1]
-            # intercept = coef[-1]
-            sigma = np.var(Y - X @ coef)
+            Y = self._centered[:, j]
+            if len(parents) > 0:
+                X = np.atleast_2d(self._centered[:, parents])
+                # Perform regression
+                coef = np.linalg.lstsq(X, Y, rcond=None)[0]
+                b[parents] = coef
+                sigma = np.var(Y - X @ coef)
+            else:
+                sigma = np.var(Y, ddof=0)
         # Or compute the regression coefficients from the
         # empirical covariance (scatter) matrix
         # i.e. b = Σ_{j,pa(j)} @ Σ_{pa(j), pa(j)}^-1

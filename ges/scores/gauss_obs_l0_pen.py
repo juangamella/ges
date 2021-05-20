@@ -50,7 +50,7 @@ class GaussObsL0Pen(DecomposableScore):
 
         Parameters
         ----------
-        data : np.array
+        data : numpy.ndarray
             the nxp matrix containing the observations of each
             variable (each column corresponds to a variable).
         lmbda : float or NoneType, optional
@@ -71,7 +71,7 @@ class GaussObsL0Pen(DecomposableScore):
 
         """
         if type(data) != np.ndarray:
-            raise ValueError("Provided data has the wrong format, type(data)=%s" % type(data))
+            raise TypeError("data should be numpy.ndarray, not %s." % type(data))
 
         super().__init__(data, cache=cache, debug=debug)
 

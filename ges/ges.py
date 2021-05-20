@@ -65,8 +65,7 @@ from ges.scores.gauss_obs_l0_pen import GaussObsL0Pen
 
 
 def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], debug=0):
-    """
-    Run GES on the given data, using the Gaussian BIC score
+    """Run GES on the given data, using the Gaussian BIC score
     (l0-penalized Gaussian Likelihood). The data is not assumed to be
     centered, i.e. an intercept is fitted.
 
@@ -74,26 +73,36 @@ def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], debug=0):
 
     Parameters
     ----------
-    data : np.array
-        the nxp matrix containing the observations of each variable
-        (each column corresponds to a variable).
-    A0 : np.array, optional
-        the initial CPDAG on which GES will run, where where A0[i,j]
-        != 0 implies i -> j and A[i,j] != 0 & A[j,i] != 0 implies i -
-        j. Defaults to the empty graph.
+    data : numpy.ndarray
+        The n x p array containing the observations, where columns
+        correspond to variables and rows to observations.
+    A0 : numpy.ndarray, optional
+        The initial CPDAG on which GES will run, where where `A0[i,j]
+        != 0` implies the edge `i -> j` and `A[i,j] != 0 & A[j,i] !=
+        0` implies the edge `i - j`. Defaults to the empty graph
+        (i.e. matrix of zeros).
     phases : [{'forward', 'backward', 'turning'}*], optional
-       which phases of the GES procedure are run, and in which
-       order. Defaults to ['forward', 'backward', 'turning'].
+       Which phases of the GES procedure are run, and in which
+       order. Defaults to `['forward', 'backward', 'turning']`.
     debug : int, optional
-        if larger than 0, debug are traces printed. Higher values
+        If larger than 0, debug are traces printed. Higher values
         correspond to increased verbosity.
 
     Returns
     -------
-    estimate : np.array
-        the adjacency matrix of the estimated CPDAG
+    estimate : numpy.ndarray
+        The adjacency matrix of the estimated CPDAG.
     total_score : float
-        the score of the estimate
+        The score of the estimate.
+
+    Raises
+    ------
+    TypeError:
+        If the type of some of the parameters was not expected,
+        e.g. if data is not a numpy array.
+    ValueError:
+        If the value of some of the parameters is not appropriate,
+        e.g. a wrong phase is specified.
 
     """
     # Initialize Gaussian BIC score (precomputes scatter matrices, sets up cache)

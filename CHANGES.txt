@@ -1,3 +1,6 @@
+v1.0.?, 2021-05-20
+  - Fixed bug in "raw" computation of Gaussian observational score + expanded tests
+  - Ran autopep on all files, removed unused imports, etc.
 v1.0.2, 2021-02-05 -- Adapted testing code to new sempler version 0.2.0.
 v1.0.1, 2021-01-24 -- Fixed project url and license on setup.py, added changelog.
 v1.0.0, 2021-01-24 -- Initial release.

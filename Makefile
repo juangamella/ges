@@ -32,7 +32,7 @@ SUITE = all
 PROJECT = ges
 
 # Run tests
-tests: test examples
+tests: test examples doctests
 
 test:
 ifeq ($(SUITE),all)
@@ -45,6 +45,10 @@ endif
 examples:
 	PYTHONPATH=./ python docs/ges_fit_bic_example.py
 	PYTHONPATH=./ python docs/ges_fit_example.py
+
+# Run the doctests
+doctests:
+	PYTHONPATH=./ python ges/ges.py
 
 # Set up virtual environment
 venv:

@@ -104,6 +104,22 @@ def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], debug=0):
         If the value of some of the parameters is not appropriate,
         e.g. a wrong phase is specified.
 
+    Example
+    -------
+
+    Data from a linear-gaussian SCM (generated using
+    `sempler <https://github.com/juangamella/sempler>`__)
+
+    >>> data = np.array([[3.23125779, 3.24950062, 13.430682, 24.67939513],
+                 [1.90913354, -0.06843781, 6.93957057, 16.10164608],
+                 [2.68547149, 1.88351553, 8.78711076, 17.18557716],
+                 [0.16850822, 1.48067393, 5.35871419, 11.82895779],
+                 [0.07355872, 1.06857039, 2.05006096, 3.07611922]])
+
+    Run GES using the gaussian BIC score:
+
+    >>> ges.fit_bic(data)
+
     """
     # Initialize Gaussian BIC score (precomputes scatter matrices, sets up cache)
     cache = GaussObsL0Pen(data)
@@ -879,3 +895,9 @@ def score_valid_turn_operators_undir(x, y, A, cache, debug=0):
         print("    turn(%d,%d,%s) -> %0.16f" % (x, y, C, new_score - old_score)) if debug else None
     # Return all valid operators
     return valid_operators
+
+
+# To run the doctests
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod(extraglobs={}, verbose=True)

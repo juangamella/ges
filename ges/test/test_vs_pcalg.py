@@ -140,3 +140,35 @@ class OverallGESTests(unittest.TestCase):
             print("    GES-own done (%0.2f seconds)" % (end - start))
             self.assertTrue((estimate == estimate_cdt).all())
         print("\nCompared with PCALG implementation on %d DAGs" % (i + 1))
+
+    def test_vs_cdt_2_raw(self):
+        # Test that behaviour matches that of the implementation in
+        # the R package pcalg, using 500 randomly generated
+        # Erdos-Renyi graphs. The call is made through the ges.fit
+        # function
+        np.random.seed(17)
+        G = 500  # number of graphs
+        p = 15  # number of variables
+        n = 1500  # size of the observational sample
+        for i in range(G):
+            print("  Checking SCM %d" % (i))
+            start = time.time()
+            A = sempler.generators.dag_avg_deg(p, 3, 1, 1)
+            W = A * np.random.uniform(1, 2, A.shape)
+            obs_sample = sempler.LGANM(W, (1, 10), (0.5, 1)).sample(n=n)
+            # Estimate the equivalence class using the pcalg
+            # implementation of GES (package cdt)
+            data = pd.DataFrame(obs_sample)
+            score_class = ges.scores.gauss_obs_l0_pen.GaussObsL0Pen(obs_sample, method='raw')
+            output = GES(verbose=True).predict(data)
+            estimate_cdt = nx.to_numpy_array(output)
+            end = time.time()
+            print("    GES-CDT done (%0.2f seconds)" % (end - start))
+            start = time.time()
+            # Estimate using this implementation
+            # Test debugging output for the first 2 SCMs
+            estimate, _ = ges.fit(score_class, debug=4 if i < 2 else 2)
+            end = time.time()
+            print("    GES-own done (%0.2f seconds)" % (end - start))
+            self.assertTrue((estimate == estimate_cdt).all())
+        print("\nCompared with PCALG implementation on %d DAGs" % (i + 1))

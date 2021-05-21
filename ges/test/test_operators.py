@@ -36,8 +36,8 @@ import numpy as np
 import sempler
 import sempler.generators
 
+import ges
 import ges.utils as utils
-import ges.ges
 from ges.scores.gauss_obs_l0_pen import GaussObsL0Pen
 
 # ---------------------------------------------------------------------
@@ -60,18 +60,18 @@ class InsertOperatorTests(unittest.TestCase):
     # ------------------------------------------------------
     # Tests
     def test_insert_1(self):
-        # Test behaviour of the ges.ges.insert(x,y,T) function
+        # Test behaviour of the ges.insert(x,y,T) function
 
         # Insert should fail on adjacent edges
         try:
-            ges.ges.insert(0, 2, set(), self.true_A)
+            ges.insert(0, 2, set(), self.true_A)
             self.fail("Call to insert should have failed")
         except ValueError as e:
             print("OK:", e)
 
         # Insert should fail when T contains non-neighbors of y
         try:
-            ges.ges.insert(0, 1, {2}, self.true_A)
+            ges.insert(0, 1, {2}, self.true_A)
             self.fail("Call to insert should have failed")
         except ValueError as e:
             print("OK:", e)
@@ -81,7 +81,7 @@ class InsertOperatorTests(unittest.TestCase):
         A[2, 4], A[4, 2] = 1, 1  # x2 - x4
         A[4, 3] = 1  # x4 -> x3
         try:
-            ges.ges.insert(3, 2, {4}, A)
+            ges.insert(3, 2, {4}, A)
             self.fail("Call to insert should have failed")
         except ValueError as e:
             print("OK:", e)
@@ -89,26 +89,26 @@ class InsertOperatorTests(unittest.TestCase):
         # This should work
         true_new_A = A.copy()
         true_new_A[3, 2] = 1
-        new_A = ges.ges.insert(3, 2, set(), A)
+        new_A = ges.insert(3, 2, set(), A)
         self.assertTrue((true_new_A == new_A).all())
 
         # This should work
         true_new_A = A.copy()
         true_new_A[1, 2] = 1
-        new_A = ges.ges.insert(1, 2, set(), A)
+        new_A = ges.insert(1, 2, set(), A)
         self.assertTrue((true_new_A == new_A).all())
 
         # This should work
         true_new_A = A.copy()
         true_new_A[1, 2] = 1
         true_new_A[4, 2], true_new_A[2, 4] = 1, 0
-        new_A = ges.ges.insert(1, 2, {4}, A)
+        new_A = ges.insert(1, 2, {4}, A)
         self.assertTrue((true_new_A == new_A).all())
 
         # This should work
         true_new_A = A.copy()
         true_new_A[1, 0] = 1
-        new_A = ges.ges.insert(1, 0, set(), A)
+        new_A = ges.insert(1, 0, set(), A)
         self.assertTrue((true_new_A == new_A).all())
 
     def test_insert_2(self):
@@ -124,7 +124,7 @@ class InsertOperatorTests(unittest.TestCase):
                 for y in Y:
                     for T in utils.subsets(utils.neighbors(y, cpdag) - adj_x):
                         # print(x,y,T)
-                        output = ges.ges.insert(x, y, T, cpdag)
+                        output = ges.insert(x, y, T, cpdag)
                         # Verify the new vstructures
                         vstructs = utils.vstructures(output)
                         for t in T:
@@ -150,7 +150,7 @@ class InsertOperatorTests(unittest.TestCase):
         #   1. X1 has no neighbors in A, so T0 = {set()}
         #   2. na_yx is also an empty set, thus na_yx U T is a clique
         #   3. there are no semi-directed paths from y to x
-        valid_operators = ges.ges.score_valid_insert_operators(0, 1, A, cache, debug=False)
+        valid_operators = ges.score_valid_insert_operators(0, 1, A, cache, debug=False)
         self.assertEqual(1, len(valid_operators))
         _, new_A, _, _, _ = valid_operators[0]
         true_new_A = A.copy()
@@ -167,7 +167,7 @@ class InsertOperatorTests(unittest.TestCase):
         #   1. X0 has no neighbors in A, so T0 = {set()}
         #   2. na_yx is also an empty set, thus na_yx U T is a clique
         #   3. there are no semi-directed paths from y to x
-        valid_operators = ges.ges.score_valid_insert_operators(1, 0, A, cache, debug=False)
+        valid_operators = ges.score_valid_insert_operators(1, 0, A, cache, debug=False)
         self.assertEqual(1, len(valid_operators))
         _, new_A, _, _, _ = valid_operators[0]
         true_new_A = A.copy()
@@ -184,7 +184,7 @@ class InsertOperatorTests(unittest.TestCase):
         #   1. insert(X0,X2,set()) should be valid
         #   2. and also insert(X0,X2,{X4}), as na_yx U T = {X4} and is a clique
         #   3. there are no semi-directed paths from y to x
-        valid_operators = ges.ges.score_valid_insert_operators(0, 2, A, cache, debug=False)
+        valid_operators = ges.score_valid_insert_operators(0, 2, A, cache, debug=False)
         self.assertEqual(2, len(valid_operators))
         # Test outcome of insert(0,2,set())
         _, new_A, _, _, _ = valid_operators[0]
@@ -207,7 +207,7 @@ class InsertOperatorTests(unittest.TestCase):
         #   1. X0 has no neighbors in A, so T0 = {set()}
         #   2. na_yx is also an empty set, thus na_yx U T is a clique
         #   3. there are no semi-directed paths from y to x
-        valid_operators = ges.ges.score_valid_insert_operators(2, 0, A, cache, debug=False)
+        valid_operators = ges.score_valid_insert_operators(2, 0, A, cache, debug=False)
         self.assertEqual(1, len(valid_operators))
         # Test outcome of insert(2,0,set())
         _, new_A, _, _, _ = valid_operators[0]
@@ -225,7 +225,7 @@ class InsertOperatorTests(unittest.TestCase):
         #   1. insert(X1,X2,set()) should be valid
         #   2. and also insert(X1,X2,{X4}), as na_yx U T = {X4} and is a clique
         #   3. there are no semi-directed paths from y to x
-        valid_operators = ges.ges.score_valid_insert_operators(1, 2, A, cache, debug=False)
+        valid_operators = ges.score_valid_insert_operators(1, 2, A, cache, debug=False)
         self.assertEqual(2, len(valid_operators))
         # Test outcome of insert(0,2,set())
         _, new_A, _, _, _ = valid_operators[0]
@@ -248,7 +248,7 @@ class InsertOperatorTests(unittest.TestCase):
         #   1. X1 has no neighbors in A, so T0 = {set()}
         #   2. na_yx is also an empty set, thus na_yx U T is a clique
         #   3. there are no semi-directed paths from y to x
-        valid_operators = ges.ges.score_valid_insert_operators(2, 1, A, cache, debug=False)
+        valid_operators = ges.score_valid_insert_operators(2, 1, A, cache, debug=False)
         self.assertEqual(1, len(valid_operators))
         # Test outcome of insert(2,0,set())
         _, new_A, _, _, _ = valid_operators[0]
@@ -266,7 +266,7 @@ class InsertOperatorTests(unittest.TestCase):
         #   1. insert(X0,X2,set()) should be valid
         #   2. na_yx U T = {X4} should be a clique
         #   3. the semi-directed path X2-X4->X3 contains one node in na_yx U T
-        valid_operators = ges.ges.score_valid_insert_operators(3, 2, A, cache, debug=False)
+        valid_operators = ges.score_valid_insert_operators(3, 2, A, cache, debug=False)
         self.assertEqual(1, len(valid_operators))
         # Test outcome of insert(3,2,set())
         _, new_A, _, _, _ = valid_operators[0]
@@ -284,7 +284,7 @@ class InsertOperatorTests(unittest.TestCase):
         #   1. insert(X2,X3,set()) should be valid
         #   2. na_yx U T = set() should be a clique
         #   3. there are no semi-directed paths between X3 and X2
-        valid_operators = ges.ges.score_valid_insert_operators(2, 3, A, cache, debug=False)
+        valid_operators = ges.score_valid_insert_operators(2, 3, A, cache, debug=False)
         self.assertEqual(1, len(valid_operators))
         # Test outcome of insert(2,3,set())
         _, new_A, _, _, _ = valid_operators[0]
@@ -300,23 +300,23 @@ class InsertOperatorTests(unittest.TestCase):
         cache = GaussObsL0Pen(self.obs_data)
         # Should fail as 2,4 are adjacent
         try:
-            ges.ges.score_valid_insert_operators(2, 4, A, cache, debug=False)
+            ges.score_valid_insert_operators(2, 4, A, cache, debug=False)
             self.fail()
         except ValueError as e:
             print("OK:", e)
         try:
-            ges.ges.score_valid_insert_operators(4, 2, A, cache, debug=False)
+            ges.score_valid_insert_operators(4, 2, A, cache, debug=False)
             self.fail()
         except ValueError as e:
             print("OK:", e)
             # Should fail as 3,4 are adjacent
         try:
-            ges.ges.score_valid_insert_operators(3, 4, A, cache, debug=False)
+            ges.score_valid_insert_operators(3, 4, A, cache, debug=False)
             self.fail()
         except ValueError as e:
             print("OK:", e)
         try:
-            ges.ges.score_valid_insert_operators(4, 3, A, cache, debug=False)
+            ges.score_valid_insert_operators(4, 3, A, cache, debug=False)
             self.fail()
         except ValueError as e:
             print("OK:", e)
@@ -333,7 +333,7 @@ class InsertOperatorTests(unittest.TestCase):
         #   2. for T=set(), na_yx U T = {1} which is a clique, and
         #   contains a node in the semi-directed path 2-1->3
         #   3. for T = {0}, na_yx U T = {0,1} which is not a clique
-        valid_operators = ges.ges.score_valid_insert_operators(3, 2, A, cache, debug=False)
+        valid_operators = ges.score_valid_insert_operators(3, 2, A, cache, debug=False)
         self.assertEqual(1, len(valid_operators))
         # Test outcome of insert(3,2,set())
         _, new_A, _, _, _ = valid_operators[0]
@@ -354,7 +354,7 @@ class InsertOperatorTests(unittest.TestCase):
         #   contain a node in the semi-directed path 2->1->3
         #   3. for T = {0}, na_yx U T = {0} which is a clique, but does not
         #   contain a node in the semi-directed path 2->1->3
-        valid_operators = ges.ges.score_valid_insert_operators(3, 2, A, cache, debug=False)
+        valid_operators = ges.score_valid_insert_operators(3, 2, A, cache, debug=False)
         self.assertEqual(0, len(valid_operators))
 
     def test_valid_insert_operators_8(self):
@@ -370,7 +370,7 @@ class InsertOperatorTests(unittest.TestCase):
         #   contain a node in the semi-directed path 2->1->3
         #   3. for T = {0}, na_yx U T = {0} which is a clique, but does not
         #   contain a node in the semi-directed path 2->1->3
-        valid_operators = ges.ges.score_valid_insert_operators(3, 2, A, cache, debug=False)
+        valid_operators = ges.score_valid_insert_operators(3, 2, A, cache, debug=False)
         self.assertEqual(0, len(valid_operators))
 
 # --------------------------------------------------------------------
@@ -395,24 +395,24 @@ class DeleteOperatorTests(unittest.TestCase):
     def test_delete_operator_preconditions(self):
         # Test that if x and y are not adjacent an exception is thrown
         try:
-            ges.ges.delete(0, 1, set(), self.true_A)
+            ges.delete(0, 1, set(), self.true_A)
             self.fail("Call to delete should have failed")
         except ValueError as e:
             print("OK", e)
         try:
-            ges.ges.delete(3, 0, set(), self.true_A)
+            ges.delete(3, 0, set(), self.true_A)
             self.fail("Call to delete should have failed")
         except ValueError as e:
             print("OK", e)
         # Test that if there is no edge x -> y or x - y an exception
         # is thrown
         try:
-            ges.ges.delete(3, 2, set(), self.true_A)
+            ges.delete(3, 2, set(), self.true_A)
             self.fail("Call to delete should have failed")
         except ValueError as e:
             print("OK", e)
         try:
-            ges.ges.delete(2, 1, set(), self.true_A)
+            ges.delete(2, 1, set(), self.true_A)
             self.fail("Call to delete should have failed")
         except ValueError as e:
             print("OK", e)
@@ -421,17 +421,17 @@ class DeleteOperatorTests(unittest.TestCase):
         cpdag = self.true_A.copy()
         cpdag[4, 3] = 1
         try:
-            ges.ges.delete(2, 4, {1}, cpdag)
+            ges.delete(2, 4, {1}, cpdag)
             self.fail("Call to delete should have failed")
         except ValueError as e:
             print("OK", e)
         try:
-            ges.ges.delete(2, 4, {0}, cpdag)
+            ges.delete(2, 4, {0}, cpdag)
             self.fail("Call to delete should have failed")
         except ValueError as e:
             print("OK", e)
         try:
-            ges.ges.delete(4, 2, {3}, cpdag)
+            ges.delete(4, 2, {3}, cpdag)
             self.fail("Call to delete should have failed")
         except ValueError as e:
             print("OK", e)
@@ -445,12 +445,12 @@ class DeleteOperatorTests(unittest.TestCase):
                       [0, 0, 0, 0, 1],
                       [0, 0, 0, 1, 0]])
         # remove the edge 2 -> 4, with H = set()
-        new_A = ges.ges.delete(2, 4, set(), A)
+        new_A = ges.delete(2, 4, set(), A)
         truth = A.copy()
         truth[2, 4] = 0
         self.assertTrue((truth == new_A).all())
         # remove the edge 2 -> 4, with H = {3}
-        new_A = ges.ges.delete(2, 4, {3}, A)
+        new_A = ges.delete(2, 4, {3}, A)
         truth = A.copy()
         truth[2, 4] = 0
         truth[3, 4] = 0
@@ -465,30 +465,30 @@ class DeleteOperatorTests(unittest.TestCase):
                       [1, 0, 1, 0, 1],
                       [0, 0, 0, 1, 0]])
         # remove the edge 0 - 1, with H = set()
-        new_A = ges.ges.delete(0, 1, set(), A)
+        new_A = ges.delete(0, 1, set(), A)
         truth = A.copy()
         truth[1, 0], truth[0, 1] = 0, 0
         self.assertTrue((truth == new_A).all())
         # remove the edge 0 -> 1, with H = {2}
-        new_A = ges.ges.delete(0, 1, {2}, A)
+        new_A = ges.delete(0, 1, {2}, A)
         truth = A.copy()
         truth[1, 0], truth[0, 1] = 0, 0
         truth[2, 0], truth[2, 1] = 0, 0
         print(new_A)
         self.assertTrue((truth == new_A).all())
         # remove the edge 0 - 2 with H = set()
-        new_A = ges.ges.delete(0, 2, set(), A)
+        new_A = ges.delete(0, 2, set(), A)
         truth = A.copy()
         truth[0, 2], truth[2, 0] = 0, 0
         self.assertTrue((truth == new_A).all())
         # remove the edge 0 - 2 with H = {1}
-        new_A = ges.ges.delete(0, 2, {1}, A)
+        new_A = ges.delete(0, 2, {1}, A)
         truth = A.copy()
         truth[0, 2], truth[2, 0] = 0, 0
         truth[1, 0], truth[1, 2] = 0, 0
         self.assertTrue((truth == new_A).all())
         # remove the edge 0 - 2 with H = {1,3}
-        new_A = ges.ges.delete(0, 2, {1, 3}, A)
+        new_A = ges.delete(0, 2, {1, 3}, A)
         truth = A.copy()
         truth[0, 2], truth[2, 0] = 0, 0
         truth[1, 0], truth[1, 2] = 0, 0
@@ -505,7 +505,7 @@ class DeleteOperatorTests(unittest.TestCase):
                 # Can only apply the operator to X -> Y or X - Y
                 for y in np.where(cpdag[x, :] != 0)[0]:
                     for H in utils.subsets(utils.na(y, x, cpdag)):
-                        output = ges.ges.delete(x, y, H, cpdag)
+                        output = ges.delete(x, y, H, cpdag)
                         # Verify the new vstructures
                         vstructs = utils.vstructures(output)
                         for h in H:
@@ -529,31 +529,31 @@ class DeleteOperatorTests(unittest.TestCase):
                       [0, 0, 1, 1, 0]])
         # Should fail as X0 and X1 are not adjacent
         try:
-            ges.ges.delete(0, 1, set(), A)
+            ges.delete(0, 1, set(), A)
             self.fail("Call to delete should have failed")
         except ValueError as e:
             print("OK", e)
         # Should fail as X0 and X1 are not adjacent
         try:
-            ges.ges.delete(1, 0, set(), A)
+            ges.delete(1, 0, set(), A)
             self.fail("Call to delete should have failed")
         except ValueError as e:
             print("OK", e)
         # Should fail as X0 and X3 are not adjacent
         try:
-            ges.ges.delete(0, 3, set(), A)
+            ges.delete(0, 3, set(), A)
             self.fail("Call to delete should have failed")
         except ValueError as e:
             print("OK", e)
         # Should fail as there is no edge X2 -> X0 or X2 - X0
         try:
-            ges.ges.delete(2, 0, set(), A)
+            ges.delete(2, 0, set(), A)
             self.fail("Call to delete should have failed")
         except ValueError as e:
             print("OK", e)
         # Should fail as there is no edge X2 -> X1 or X2 - X1
         try:
-            ges.ges.delete(2, 1, set(), A)
+            ges.delete(2, 1, set(), A)
             self.fail("Call to delete should have failed")
         except ValueError as e:
             print("OK", e)
@@ -569,7 +569,7 @@ class DeleteOperatorTests(unittest.TestCase):
         # operators, for:
         #   1. H = Ø, as NA_yx \ Ø = {X3} is a clique
         #   2. H = {3}, as NA_yx \ {X3} = Ø is a clique
-        output = ges.ges.score_valid_delete_operators(2, 4, A, cache)
+        output = ges.score_valid_delete_operators(2, 4, A, cache)
         self.assertEqual(2, len(output))
         A1, A2 = A.copy(), A.copy()
         # Remove X2 - X4
@@ -589,7 +589,7 @@ class DeleteOperatorTests(unittest.TestCase):
         # Removing the edge X1 - X2 should yield one valid
         # operator, for:
         #   1. H = Ø, as NA_yx \ Ø = {X3, X4} is a clique
-        output = ges.ges.score_valid_delete_operators(1, 2, A, cache)
+        output = ges.score_valid_delete_operators(1, 2, A, cache)
         self.assertEqual(1, len(output))
         true_A = A.copy()
         # Remove X1 - X2
@@ -609,8 +609,8 @@ class DeleteOperatorTests(unittest.TestCase):
             fro, to = np.where(utils.only_undirected(cpdag))
             # Test the operator to all undirected edges
             for (x, y) in zip(fro, to):
-                output_a = ges.ges.score_valid_delete_operators(x, y, cpdag, cache)
-                output_b = ges.ges.score_valid_delete_operators(y, x, cpdag, cache)
+                output_a = ges.score_valid_delete_operators(x, y, cpdag, cache)
+                output_b = ges.score_valid_delete_operators(y, x, cpdag, cache)
                 for (op_a, op_b) in zip(output_a, output_b):
                     # Check resulting state is the same
                     self.assertTrue((op_a[1] == op_b[1]).all())
@@ -627,7 +627,7 @@ class DeleteOperatorTests(unittest.TestCase):
         # operators, for:
         #   1. H = Ø, as NA_yx \ Ø = {X1} is a clique
         #   2. H = {1}, as NA_yx \ {X1} = Ø is a clique
-        output = ges.ges.score_valid_delete_operators(0, 2, A, cache)
+        output = ges.score_valid_delete_operators(0, 2, A, cache)
         self.assertEqual(2, len(output))
         A1, A2 = A.copy(), A.copy()
         # Remove X2 - X4
@@ -650,7 +650,7 @@ class DeleteOperatorTests(unittest.TestCase):
         #   1. H = {X2}, as NA_yx \ H = {X3} is a clique
         #   2. H = {X3}, as NA_yx \ H = {X2} is a clique
         #   3. H = {X2,X3}, as NA_yx \ H = Ø is a clique
-        output = ges.ges.score_valid_delete_operators(0, 1, A, cache)
+        output = ges.score_valid_delete_operators(0, 1, A, cache)
         print(output)
         self.assertEqual(3, len(output))
         # v-structure on X2, i.e orient X0 -> X2, X1 -> X2
@@ -697,7 +697,7 @@ class TurnOperatorTests(unittest.TestCase):
                       [0, 1, 0, 1, 0],
                       [0, 1, 1, 0, 0],
                       [0, 0, 0, 0, 0]])
-        output = ges.ges.turn(1, 2, {3}, A)
+        output = ges.turn(1, 2, {3}, A)
         # Orient X1 -> X2 and X3 -> X2
         A[2, 1], A[1, 2] = 0, 1
         A[2, 3] = 0
@@ -710,24 +710,24 @@ class TurnOperatorTests(unittest.TestCase):
                       [0, 1, 0, 0, 0],
                       [0, 1, 0, 0, 0]])
         # Turn edge X3 - X1 to X3 -> X1 with C = {X4, X0}
-        output = ges.ges.turn(3, 1, {0, 4}, A)
+        output = ges.turn(3, 1, {0, 4}, A)
         truth = A.copy()
         truth[1, 3] = 0
         truth[1, 0], truth[1, 4] = 0, 0
         self.assertTrue((truth == output).all())
         # Turn edge X1 - X3 to X1 -> X3 with C = Ø
-        output = ges.ges.turn(1, 3, set(), A)
+        output = ges.turn(1, 3, set(), A)
         truth = A.copy()
         truth[3, 1] = 0
         self.assertTrue((truth == output).all())
         # Turn edge X4 -> X1 with C = {X3}
-        output = ges.ges.turn(4, 1, {3}, A)
+        output = ges.turn(4, 1, {3}, A)
         truth = A.copy()
         truth[1, 4] = 0
         truth[1, 3] = 0
         self.assertTrue((truth == output).all())
         # Turn edge X2 -> X0 with C = {X1}
-        output = ges.ges.turn(2, 0, {1}, A)
+        output = ges.turn(2, 0, {1}, A)
         truth = A.copy()
         truth[0, 2], truth[2, 0] = 0, 1
         truth[0, 1] = 0
@@ -741,31 +741,31 @@ class TurnOperatorTests(unittest.TestCase):
                       [0, 1, 0, 0, 0]])
         # Trying to turn X1 -> X2 fails as edge already exists
         try:
-            ges.ges.turn(1, 2, set(), A)
+            ges.turn(1, 2, set(), A)
             self.fail("Exception should have been thrown")
         except ValueError as e:
             print("OK:", e)
         # Trying to turn X3 -> X4 fails as they are not adjacent
         try:
-            ges.ges.turn(3, 4, set(), A)
+            ges.turn(3, 4, set(), A)
             self.fail("Exception should have been thrown")
         except ValueError as e:
             print("OK:", e)
         # Trying to turn X3 <- X4 fails as they are not adjacent
         try:
-            ges.ges.turn(4, 3, set(), A)
+            ges.turn(4, 3, set(), A)
             self.fail("Exception should have been thrown")
         except ValueError as e:
             print("OK:", e)
         # Turning X0 -> X1 with C = {X3,X2} fails as X2 is not a neighbor of X1
         try:
-            ges.ges.turn(0, 1, {3, 2}, A)
+            ges.turn(0, 1, {3, 2}, A)
             self.fail("Exception should have been thrown")
         except ValueError as e:
             print("OK:", e)
         # Turning X3 -> X1 with C = {X4,X0,X3} should fail as X3 is contained in C
         try:
-            ges.ges.turn(3, 1, {0, 3, 4}, A)
+            ges.turn(3, 1, {0, 3, 4}, A)
             self.fail("Exception should have been thrown")
         except ValueError as e:
             print("OK:", e)
@@ -779,19 +779,19 @@ class TurnOperatorTests(unittest.TestCase):
                       [0, 1, 0, 0, 0]])
         # Trying to turn X1 -> X2 fails as edge already exists
         try:
-            ges.ges.score_valid_turn_operators(1, 2, A, self.cache)
+            ges.score_valid_turn_operators(1, 2, A, self.cache)
             self.fail("Exception should have been thrown")
         except ValueError as e:
             print("OK:", e)
         # Trying to turn X3 -> X4 fails as they are not adjacent
         try:
-            ges.ges.score_valid_turn_operators(3, 4, A, self.cache)
+            ges.score_valid_turn_operators(3, 4, A, self.cache)
             self.fail("Exception should have been thrown")
         except ValueError as e:
             print("OK:", e)
         # Trying to turn X3 <- X4 fails as they are not adjacent
         try:
-            ges.ges.score_valid_turn_operators(4, 3, A, self.cache)
+            ges.score_valid_turn_operators(4, 3, A, self.cache)
             self.fail("Exception should have been thrown")
         except ValueError as e:
             print("OK:", e)
@@ -805,7 +805,7 @@ class TurnOperatorTests(unittest.TestCase):
         # Turning the edge X1 <- X2 should yield one valid
         # operator, for:
         #   1. T = Ø, as NA_yx U Ø = {X3} is a clique
-        output = ges.ges.score_valid_turn_operators(1, 2, A, self.cache)
+        output = ges.score_valid_turn_operators(1, 2, A, self.cache)
         self.assertEqual(1, len(output))
         true_A = A.copy()
         # Turn X1 <- X2 (and orient X3 -> X2)
@@ -824,7 +824,7 @@ class TurnOperatorTests(unittest.TestCase):
         # Turning the edge X1 <- X3 should yield one valid
         # operator, for:
         #   1. T = Ø, as NA_yx U Ø = {X2} is a clique
-        output = ges.ges.score_valid_turn_operators(1, 3, A, self.cache)
+        output = ges.score_valid_turn_operators(1, 3, A, self.cache)
         self.assertEqual(1, len(output))
         true_A = A.copy()
         # Turn X1 <- X3 (and orient X2 -> X3)
@@ -843,7 +843,7 @@ class TurnOperatorTests(unittest.TestCase):
         # Turning the edge X0 -> X1 should yield one valid
         # operator, for:
         #   1. T = Ø, as NA_yx U Ø = Ø is a clique
-        output = ges.ges.score_valid_turn_operators(1, 0, A, self.cache)
+        output = ges.score_valid_turn_operators(1, 0, A, self.cache)
         self.assertEqual(1, len(output))
         true_A = A.copy()
         # Turn X1 <- X0
@@ -861,7 +861,7 @@ class TurnOperatorTests(unittest.TestCase):
         # operators, for (note T0 = {X4})
         #   1. T = Ø, as C = NA_yx U Ø = {X2,X3} is not a clique
         #   2. T = {X4}, as C = NA_yx U {X4} = {X2,X3,X4} is not a clique
-        output = ges.ges.score_valid_turn_operators(1, 0, A, self.cache)
+        output = ges.score_valid_turn_operators(1, 0, A, self.cache)
         self.assertEqual(0, len(output))
 
     def test_valid_turn_operators_5(self):
@@ -876,7 +876,7 @@ class TurnOperatorTests(unittest.TestCase):
         #   X0 - X2 - X3 -> X1 does not contain a node in C
         #   2. T = {X2}, as C = NA_yx U {X2} = {X2} is a clique and
         #   satisfies the path condition
-        output = ges.ges.score_valid_turn_operators(1, 0, A, self.cache)
+        output = ges.score_valid_turn_operators(1, 0, A, self.cache)
         self.assertEqual(1, len(output))
         # Orient X1 -> X0 and X2 -> X0
         truth = A.copy()
@@ -892,7 +892,7 @@ class TurnOperatorTests(unittest.TestCase):
                       [0, 0, 0, 0, 0]])
         # Orienting the edge X1 -> X3 yields not valid operators, as
         # all neighbors of X1 are adjacent to X3
-        output = ges.ges.score_valid_turn_operators(1, 3, A, self.cache)
+        output = ges.score_valid_turn_operators(1, 3, A, self.cache)
         self.assertEqual(0, len(output))
 
     def test_valid_turn_operators_7(self):
@@ -901,7 +901,7 @@ class TurnOperatorTests(unittest.TestCase):
                       [0, 1, 0, 1, 0],
                       [0, 1, 1, 0, 0],
                       [0, 0, 0, 0, 0]])
-        output = ges.ges.score_valid_turn_operators(3, 1, A, self.cache)
+        output = ges.score_valid_turn_operators(3, 1, A, self.cache)
         # Orienting the edge X3 -> X1 yields only one valid operator,
         # as for (note ne(X1) = {X2, X0}
         #   C = Ø and C = {X2} condition (i) is not satisfied
@@ -924,7 +924,7 @@ class TurnOperatorTests(unittest.TestCase):
         # For the edge X0 -> X1 three operators are valid
         #   C = Ø : does not satisfy condition 1
         #   C = {X2}, {X3}, {X2,X3} are valid
-        output = ges.ges.score_valid_turn_operators(0, 1, A, self.cache)
+        output = ges.score_valid_turn_operators(0, 1, A, self.cache)
         self.assertEqual(3, len(output))
         truth_2 = np.array([[0, 1, 0, 0, 0],
                             [0, 0, 0, 1, 0],
@@ -962,7 +962,7 @@ class TurnOperatorTests(unittest.TestCase):
         #   C = {X3} is valid
         #   C = {X5} does not satisfy condition i
         #   C = {X3,X5} do not form a clique
-        output = ges.ges.score_valid_turn_operators(0, 1, A, self.cache)
+        output = ges.score_valid_turn_operators(0, 1, A, self.cache)
         self.assertEqual(1, len(output))
         truth = np.array([[0, 1, 1, 0, 0, 1],
                           [0, 0, 1, 0, 0, 1],
@@ -985,7 +985,7 @@ class TurnOperatorTests(unittest.TestCase):
             cache = GaussObsL0Pen(obs_sample)
             fro, to = np.where(cpdag != 0)
             for (x, y) in zip(to, fro):
-                valid_operators = ges.ges.score_valid_turn_operators(x, y, cpdag, cache)
+                valid_operators = ges.score_valid_turn_operators(x, y, cpdag, cache)
                 # print(i,len(valid_operators))
                 for (_, new_A, _, _, _) in valid_operators:
                     new_cpdag = ges.utils.pdag_to_cpdag(new_A)

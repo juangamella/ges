@@ -100,7 +100,7 @@ class ScoreTests(unittest.TestCase):
         try:
             GaussObsL0Pen([self.obs_data])
             self.fail()
-        except ValueError:
+        except TypeError:
             pass
         except Exception:
             self.fail()

@@ -35,15 +35,15 @@ algorithm described in Chickering's original GES paper from 2002.
 """
 
 import numpy as np
-from functools import reduce
 import itertools
 
 # --------------------------------------------------------------------
 # Graph functions for PDAGS
 
-def na(y,x,A):
+
+def na(y, x, A):
     """Return all neighbors of y which are adjacent to x in A.
-    
+
     Parameters
     ----------
     y : int
@@ -60,9 +60,10 @@ def na(y,x,A):
         the resulting nodes
 
     """
-    return neighbors(y,A) & adj(x,A)
+    return neighbors(y, A) & adj(x, A)
 
-def neighbors(i,A):
+
+def neighbors(i, A):
     """The neighbors of i in A, i.e. all nodes connected to i by an
     undirected edge.
 
@@ -80,8 +81,9 @@ def neighbors(i,A):
         the neighbor nodes
 
     """
-    return set(np.where(np.logical_and(A[i,:] != 0, A[:,i] != 0))[0])
-    
+    return set(np.where(np.logical_and(A[i, :] != 0, A[:, i] != 0))[0])
+
+
 def adj(i, A):
     """The adjacent nodes of i in A, i.e. all nodes connected by a
     directed or undirected edge.
@@ -99,7 +101,8 @@ def adj(i, A):
         the adjacent nodes
 
     """
-    return set(np.where(np.logical_or(A[i,:] != 0, A[:,i] != 0))[0])
+    return set(np.where(np.logical_or(A[i, :] != 0, A[:, i] != 0))[0])
+
 
 def pa(i, A):
     """The parents of i in A.
@@ -116,9 +119,10 @@ def pa(i, A):
     -------
     nodes : set of ints
         the parent nodes
-    
+
     """
-    return set(np.where(np.logical_and(A[:,i] != 0, A[i,:] == 0))[0])
+    return set(np.where(np.logical_and(A[:, i] != 0, A[i, :] == 0))[0])
+
 
 def ch(i, A):
     """The children of i in A.
@@ -135,7 +139,8 @@ def ch(i, A):
         the children nodes
 
     """
-    return set(np.where(np.logical_and(A[i,:] != 0, A[:,i] == 0))[0])
+    return set(np.where(np.logical_and(A[i, :] != 0, A[:, i] == 0))[0])
+
 
 def is_clique(S, A):
     """Check if the subgraph of A induced by nodes S is a clique.
@@ -155,11 +160,12 @@ def is_clique(S, A):
 
     """
     S = list(S)
-    subgraph = A[S,:][:,S]
-    subgraph = skeleton(subgraph) # drop edge orientations
+    subgraph = A[S, :][:, S]
+    subgraph = skeleton(subgraph)  # drop edge orientations
     no_edges = np.sum(subgraph != 0)
     n = len(S)
-    return no_edges == n * (n-1)
+    return no_edges == n * (n - 1)
+
 
 def is_dag(A):
     """Checks wether the given adjacency matrix corresponds to a DAG.
@@ -173,7 +179,6 @@ def is_dag(A):
     -------
     is_dag : bool
         if the adjacency corresponds to a DAG
-
     """
     try:
         topological_ordering(A)
@@ -181,13 +186,14 @@ def is_dag(A):
     except ValueError:
         return False
 
+
 def topological_ordering(A):
     """Return a topological ordering for the DAG with adjacency matrix A,
     using Kahn's 1962 algorithm.
 
     Raises a ValueError exception if the given adjacency does not
     correspond to a DAG.
-    
+
     Parameters
     ----------
     A : np.array
@@ -197,6 +203,11 @@ def topological_ordering(A):
     -------
     ordering : list of ints
         a topological ordering for the DAG
+
+    Raises
+    ------
+    ValueError :
+        If the given adjacency does not correspond to a DAG.
 
     """
     # Check that there are no undirected edges
@@ -210,9 +221,9 @@ def topological_ordering(A):
     while len(sinks) > 0:
         i = sinks.pop()
         ordering.append(i)
-        for j in ch(i,A):
-            A[i,j] = 0
-            if len(pa(j,A)) == 0:
+        for j in ch(i, A):
+            A[i, j] = 0
+            if len(pa(j, A)) == 0:
                 sinks.append(j)
     # If A still contains edges there is at least one cycle
     if A.sum() > 0:
@@ -220,7 +231,8 @@ def topological_ordering(A):
     else:
         return ordering
 
-def semi_directed_paths(fro,to,A):
+
+def semi_directed_paths(fro, to, A):
     """Return all paths from i to j in A. Note: a path is a sequence
     (a_1,...,a_n) of non-repeating nodes where either a_i -> a_i+1 or
     a_i - a_i+1 are edges in the PDAG A.
@@ -238,15 +250,15 @@ def semi_directed_paths(fro,to,A):
     -------
     paths : list of lists
         all the paths between the two nodes
-    
+
     """
     # NOTE: Implemented non-recursively to avoid issues with Python's
     # stack size limit
-    stack = [(fro,[],list(ch(fro,A) | neighbors(fro,A)))]
+    stack = [(fro, [], list(ch(fro, A) | neighbors(fro, A)))]
     paths = []
     # Precompute the nodes that are accessible from each node for a
     # significant increase in speed
-    accessible = dict((i,ch(i,A) | neighbors(i,A)) for i in range(len(A)))
+    accessible = dict((i, ch(i, A) | neighbors(i, A)) for i in range(len(A)))
     while len(stack) > 0:
         current_node, visited, to_visit = stack[0]
         if current_node == to:
@@ -260,7 +272,8 @@ def semi_directed_paths(fro,to,A):
             stack = [(next_node, visited + [current_node], next_to_visit)] + stack
     return paths
 
-def separates(S,A,B,G):
+
+def separates(S, A, B, G):
     """Returns true if the set S separates A from B in G, i.e. if all
     paths in G from nodes in A to nodes in B contain a node in
     S. Exception is raised if S,A and B are not pairwise disjoint.
@@ -276,7 +289,7 @@ def separates(S,A,B,G):
     G : np.array
         the adjacency matrix of the graph, where G[i,j] != 0 => i -> j
         and G[i,j] != 0 and G[j,i] != 0 => i - j.
-    
+
     Returns
     -------
     separated : bool
@@ -285,18 +298,19 @@ def separates(S,A,B,G):
     """
     # Check that sets are pairwise disjoint
     if len(A & B) or len(A & S) or len(B & S):
-        raise ValueError("The sets S=%s,A=%s and B=%s are not pairwise disjoint" % (S,A,B))
+        raise ValueError("The sets S=%s,A=%s and B=%s are not pairwise disjoint" % (S, A, B))
     for a in A:
         for b in B:
-            for path in semi_directed_paths(a,b,G):
+            for path in semi_directed_paths(a, b, G):
                 if set(path) & S == set():
                     return False
     return True
 
+
 def chain_component(i, G):
     """Return all nodes in the connected component of node i after
     dropping all directed edges in G.
-    
+
     Parameters
     ----------
     i : int
@@ -320,6 +334,7 @@ def chain_component(i, G):
             visited.add(j)
             to_visit = (to_visit | neighbors(j, A)) - visited
     return visited
+
 
 def induced_subgraph(S, G):
     """Remove all edges which are not between nodes in S.
@@ -347,8 +362,8 @@ def induced_subgraph(S, G):
     subgraph[mask] = G[mask]
     return subgraph
 
-def vstructures(A):
 
+def vstructures(A):
     """
     Return the v-structures of a DAG or PDAG, given its adjacency matrix.
 
@@ -363,7 +378,7 @@ def vstructures(A):
         the set of v-structures, where every v-structure is a three
         element tuple, e.g. (i,j,k) represents the v-structure
         i -> j <- k, where i < j for consistency.
-    
+
     """
     # Construct the graph with only the directed edges
     dir_A = only_directed(A)
@@ -373,15 +388,16 @@ def vstructures(A):
     # parents are adjacent in A
     vstructs = []
     for c in colliders:
-        for (i,j) in itertools.combinations(pa(c,A), 2):
-            if A[i,j] == 0 and A[j,i] == 0:
+        for (i, j) in itertools.combinations(pa(c, A), 2):
+            if A[i, j] == 0 and A[j, i] == 0:
                 # Ordering might be defensive here, as
                 # itertools.combinations already returns ordered
                 # tuples; motivation is to not depend on their feature
-                vstruct = (i,c,j) if i < j else (j,c,i)
+                vstruct = (i, c, j) if i < j else (j, c, i)
                 vstructs.append(vstruct)
     return set(vstructs)
-    
+
+
 def only_directed(P):
     """
     Return the graph with the same nodes as P and only its directed edges.
@@ -404,6 +420,7 @@ def only_directed(P):
     # interest in maintaining the weights
     G[mask] = P[mask]
     return G
+
 
 def only_undirected(P):
     """
@@ -428,6 +445,7 @@ def only_undirected(P):
     G[mask] = P[mask]
     return G
 
+
 def skeleton(A):
     """Return the skeleton of a given graph.
 
@@ -444,8 +462,9 @@ def skeleton(A):
 
     """
     return ((A + A.T) != 0).astype(int)
-    
-def is_consistent_extension(G,P,debug=False):
+
+
+def is_consistent_extension(G, P, debug=False):
     """Returns True if the DAG G is a consistent extension of the PDAG
     P. Will raise a ValueError exception if the graph G is not a DAG
     (i.e. cycles or undirected edges).
@@ -478,12 +497,12 @@ def is_consistent_extension(G,P,debug=False):
     same_skeleton = (skeleton(P) == skeleton(G)).all()
     # same orientation
     directed_P = only_directed(P)
-    same_orientation = G[directed_P != 0].all() # No need to check
-                                                # transpose as G is
-                                                # guaranteed to have
-                                                # no undirected edges
+    same_orientation = G[directed_P != 0].all()  # No need to check
+    # transpose as G is
+    # guaranteed to have
+    # no undirected edges
     if debug:
-        print("v-structures (%s) (P,G): " % same_vstructures,  vstructures(P), vstructures(G))
+        print("v-structures (%s) (P,G): " % same_vstructures, vstructures(P), vstructures(G))
         print("skeleton (%s) (P,G): " % same_skeleton, skeleton(P), skeleton(G))
         print("orientation (%s) (P,G): " % same_orientation, P, G)
     return same_vstructures and same_orientation and same_skeleton
@@ -529,6 +548,7 @@ def is_consistent_extension(G,P,debug=False):
 
 # The complete pipeline: pdag -> dag -> ordered -> labelled -> cpdag
 
+
 def pdag_to_cpdag(pdag):
     """
     Transform a PDAG into its corresponding CPDAG. Returns a ValueError
@@ -552,6 +572,8 @@ def pdag_to_cpdag(pdag):
     return dag_to_cpdag(dag)
 
 # dag -> ordered -> labelled -> cpdag
+
+
 def dag_to_cpdag(G):
     """
     Return the completed partially directed acyclic graph (CPDAG) that
@@ -578,11 +600,12 @@ def dag_to_cpdag(G):
     # set compelled edges
     cpdag[labelled == 1] = labelled[labelled == 1]
     # set reversible edges
-    fros,tos = np.where(labelled == -1)
-    for (x,y) in zip(fros, tos):
-        cpdag[x,y], cpdag[y,x] = 1, 1
+    fros, tos = np.where(labelled == -1)
+    for (x, y) in zip(fros, tos):
+        cpdag[x, y], cpdag[y, x] = 1, 1
     return cpdag
-    
+
+
 def pdag_to_dag(P, debug=False):
     """
     Find a consistent extension of the given PDAG. Return a ValueError
@@ -604,8 +627,8 @@ def pdag_to_dag(P, debug=False):
 
     """
     G = only_directed(P)
-    indexes = list(range(len(P))) # To keep track of the real variable
-                                  # indexes as we remove nodes from P
+    indexes = list(range(len(P)))  # To keep track of the real variable
+    # indexes as we remove nodes from P
     while P.size > 0:
         print(P) if debug else None
         print(indexes) if debug else None
@@ -616,12 +639,12 @@ def pdag_to_dag(P, debug=False):
         i = 0
         while not found and i < len(P):
             # Check condition 1
-            sink = len(ch(i,P)) == 0
+            sink = len(ch(i, P)) == 0
             # Check condition 2
-            n_i = neighbors(i,P)
-            adj_i = adj(i,P)
-            adj_neighbors = np.all([adj_i - {y} <= adj(y,P) for y in n_i])
-            print("   i:",i,": n=",n_i,"adj=",adj_i,"ch=",ch(i,P)) if debug else None
+            n_i = neighbors(i, P)
+            adj_i = adj(i, P)
+            adj_neighbors = np.all([adj_i - {y} <= adj(y, P) for y in n_i])
+            print("   i:", i, ": n=", n_i, "adj=", adj_i, "ch=", ch(i, P)) if debug else None
             found = sink and adj_neighbors
             # If found, orient all incident undirected edges and
             # remove i from the subgraph
@@ -631,12 +654,12 @@ def pdag_to_dag(P, debug=False):
                 real_i = indexes[i]
                 real_neighbors = [indexes[j] for j in n_i]
                 for j in real_neighbors:
-                    G[j,real_i] = 1
+                    G[j, real_i] = 1
                 # Remove i and its incident (directed and undirected edges)
                 all_but_i = list(set(range(len(P))) - {i})
                 P = P[all_but_i, :][:, all_but_i]
-                indexes.remove(real_i) # to keep track of the real
-                                       # variable indices
+                indexes.remove(real_i)  # to keep track of the real
+                # variable indices
             else:
                 i += 1
         # A node which satisfies conditions 1,2 exists iff the
@@ -644,7 +667,8 @@ def pdag_to_dag(P, debug=False):
         if not found:
             raise ValueError("PDAG does not admit consistent extension")
     return G
-    
+
+
 def order_edges(G):
     """
     Find a total ordering of the edges in DAG G, as an intermediate
@@ -655,7 +679,7 @@ def order_edges(G):
     ----------
     G : np.array
         the adjacency matrix of a graph G, where G[i,j] != 0 iff i -> j.
-    
+
     Returns
     -------
     ordered : np.array
@@ -675,15 +699,16 @@ def order_edges(G):
         # let y be the lowest ordered node that has an unlabelled edge
         # incident to it
         froms, tos = np.where(ordered == -1)
-        with_unlabelled = np.unique(np.hstack((froms,tos)))
+        with_unlabelled = np.unique(np.hstack((froms, tos)))
         y = sort(with_unlabelled, reversed(order))[0]
         # let x be the highest ordered node s.t. the edge x -> y
         # exists and is unlabelled
-        unlabelled_parents_y = np.where(ordered[:,y] == -1)[0]
+        unlabelled_parents_y = np.where(ordered[:, y] == -1)[0]
         x = sort(unlabelled_parents_y, order)[0]
-        ordered[x,y] = i
+        ordered[x, y] = i
         i += 1
     return ordered
+
 
 def label_edges(ordered):
     """Given a DAG with edges labelled according to a total ordering,
@@ -694,7 +719,7 @@ def label_edges(ordered):
     ordered : np.array
         the adjacency matrix of a graph, with the edges labelled
         according to a total ordering.
-    
+
     Returns
     -------
     labelled : np.array
@@ -707,42 +732,42 @@ def label_edges(ordered):
     if not is_dag(ordered):
         raise ValueError("The given graph is not a DAG")
     no_edges = (ordered != 0).sum()
-    if sorted(ordered[ordered != 0]) != list(range(1,no_edges+1)):
-        raise ValueError("The ordering of edges is not valid:", ordered[ordered != 0])        
+    if sorted(ordered[ordered != 0]) != list(range(1, no_edges + 1)):
+        raise ValueError("The ordering of edges is not valid:", ordered[ordered != 0])
     # define labels: 1: compelled, -1: reversible, -2: unknown
     COM, REV, UNK = 1, -1, -2
     labelled = (ordered != 0).astype(int) * UNK
     # while there are unknown edges
     while (labelled == UNK).any():
-        #print(labelled)
+        # print(labelled)
         # let (x,y) be the unknown edge with lowest order
         # (i.e. appears last in the ordering, NOT has smalles label)
         # in ordered
         unknown_edges = (ordered * (labelled == UNK).astype(int)).astype(float)
         unknown_edges[unknown_edges == 0] = -np.inf
-        #print(unknown_edges)
-        (x,y) = np.unravel_index(np.argmax(unknown_edges), unknown_edges.shape)
-        #print(x,y)
+        # print(unknown_edges)
+        (x, y) = np.unravel_index(np.argmax(unknown_edges), unknown_edges.shape)
+        # print(x,y)
         # iterate over all edges w -> x which are compelled
-        Ws = np.where(labelled[:,x] == COM)[0]
+        Ws = np.where(labelled[:, x] == COM)[0]
         end = False
         for w in Ws:
             # if w is not a parent of y, label all edges into y as
             # compelled, and finish this pass
-            if labelled[w,y] == 0:
+            if labelled[w, y] == 0:
                 labelled[list(pa(y, labelled)), y] = COM
                 end = True
                 break
             # otherwise, label w -> y as compelled
             else:
-                labelled[w,y] = COM
+                labelled[w, y] = COM
         if not end:
             # if there exists an edge z -> y such that z != x and z is
             # not a parent of x, label all unknown edges (this
             # includes x -> y) into y with compelled; label with
             # reversible otherwise.
-            z_exists = len(pa(y, labelled) - {x} - pa(x,labelled)) > 0
-            unknown = np.where(labelled[:,y] == UNK)[0]
+            z_exists = len(pa(y, labelled) - {x} - pa(x, labelled)) > 0
+            unknown = np.where(labelled[:, y] == UNK)[0]
             assert x in unknown
             labelled[unknown, y] = COM if z_exists else REV
     return labelled
@@ -752,6 +777,8 @@ def label_edges(ordered):
 
 # Very fast way to generate a cartesian product of input arrays
 # Credit: https://gist.github.com/hernamesbarbara/68d073f551565de02ac5
+
+
 def cartesian(arrays, out=None, dtype=np.byte):
     """
     Generate a cartesian product of input arrays.
@@ -793,12 +820,13 @@ def cartesian(arrays, out=None, dtype=np.byte):
         out = np.zeros([n, len(arrays)], dtype=dtype)
 
     m = int(n / arrays[0].size)
-    out[:,0] = np.repeat(arrays[0], m)
+    out[:, 0] = np.repeat(arrays[0], m)
     if arrays[1:]:
-        cartesian(arrays[1:], out=out[0:m,1:])
+        cartesian(arrays[1:], out=out[0:m, 1:])
         for j in range(1, arrays[0].size):
-            out[j*m:(j+1)*m,1:] = out[0:m,1:]
+            out[j * m:(j + 1) * m, 1:] = out[0:m, 1:]
     return out
+
 
 def sort(L, order=None):
     """Sort the elements in an iterable according to its pre-defined
@@ -831,6 +859,7 @@ def sort(L, order=None):
         positions = [pos[l] for l in L]
         return [tup[1] for tup in sorted(zip(positions, L))]
 
+
 def subsets(S):
     """
     Return an iterator with all possible subsets of the set S.
@@ -847,14 +876,15 @@ def subsets(S):
 
     """
     subsets = []
-    for r in range(len(S)+1):
+    for r in range(len(S) + 1):
         subsets += [set(ss) for ss in itertools.combinations(S, r)]
     return subsets
+
 
 def member(L, A):
     """
     Return the index of the first appearance of array A in L.
-    
+
     Parameters
     ----------
     L : list of np.array
@@ -869,10 +899,11 @@ def member(L, A):
         None if A is not in L.
 
     """
-    for i,B in enumerate(L):
-        if (A==B).all():
+    for i, B in enumerate(L):
+        if (A == B).all():
             return i
     return None
+
 
 def delete(array, mask, axis=None):
     """Wrapper for numpy.delete, which adapts the call depending on the
@@ -898,4 +929,3 @@ def delete(array, mask, axis=None):
         return np.delete(array, idx, axis)
     else:
         return np.delete(array, mask, axis)
-

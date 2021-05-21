@@ -1,1 +1,9 @@
-install.packages(c("pcalg", "kpcalg", "bnlearn", "sparsebn", "SID", "CAM", "D2C", "RCIT"))
+# Some packages required by pcalg can only be installed through bioconductor
+install.packages("BiocManager")
+BiocManager::install(c("graph", "RBGL"))
+
+# Install pcalg
+install.packages("pcalg")
+
+# Additional packages required by the CausalDiscoveryToolbox (cdt), not required for the tests
+# c("kpcalg", "bnlearn", "sparsebn", "SID", "CAM", "D2C", "RCIT")

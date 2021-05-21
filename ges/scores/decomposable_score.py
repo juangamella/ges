@@ -46,14 +46,16 @@ import copy
 # --------------------------------------------------------------------
 # l0-penalized Gaussian log-likelihood score for a sample from a single
 # (observational) environment
+
+
 class DecomposableScore():
-    
+
     def __init__(self, data, cache=True, debug=0):
         self._data = copy.deepcopy(data)
         self._cache = {} if cache else None
         self._debug = debug
         self.p = None
-            
+
     def local_score(self, x, pa):
         """
         Return the local score of a given node and a set of
@@ -79,11 +81,12 @@ class DecomposableScore():
             key = (x, tuple(sorted(pa)))
             try:
                 score = self._cache[key]
-                print("score%s: using cached value %0.2f" % (key,score)) if self._debug>=2 else None
+                print("score%s: using cached value %0.2f" %
+                      (key, score)) if self._debug >= 2 else None
             except KeyError:
                 score = self._compute_local_score(x, pa)
                 self._cache[key] = score
-                print("score%s = %0.2f" % (key,score)) if self._debug>=2 else None
+                print("score%s = %0.2f" % (key, score)) if self._debug >= 2 else None
             return score
 
     def _compute_local_score(self, x, pa):

@@ -48,6 +48,8 @@ import pandas as pd
 
 # ---------------------------------------------------------------------
 
+NUM_GRAPHS = 100
+
 
 class OverallGESTests(unittest.TestCase):
     true_A = np.array([[0, 0, 1, 0, 0],
@@ -84,7 +86,7 @@ class OverallGESTests(unittest.TestCase):
         # Erdos-Renyi graphs. The call is made through the ges.fit_bic
         # function
         np.random.seed(15)
-        G = 500  # number of graphs
+        G = NUM_GRAPHS  # number of graphs
         p = 15  # number of variables
         n = 1500  # size of the observational sample
         for i in range(G):
@@ -115,7 +117,7 @@ class OverallGESTests(unittest.TestCase):
         # Erdos-Renyi graphs. The call is made through the ges.fit
         # function
         np.random.seed(16)
-        G = 500  # number of graphs
+        G = NUM_GRAPHS  # number of graphs
         p = 15  # number of variables
         n = 1500  # size of the observational sample
         for i in range(G):
@@ -147,7 +149,7 @@ class OverallGESTests(unittest.TestCase):
         # Erdos-Renyi graphs. The call is made through the ges.fit
         # function
         np.random.seed(17)
-        G = 500  # number of graphs
+        G = NUM_GRAPHS  # number of graphs
         p = 15  # number of variables
         n = 1500  # size of the observational sample
         for i in range(G):

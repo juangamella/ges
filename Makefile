@@ -48,7 +48,7 @@ examples:
 
 # Run the doctests
 doctests:
-	PYTHONPATH=./ python ges/ges.py
+	PYTHONPATH=./ python ges/main.py
 
 # Set up virtual environment
 venv:

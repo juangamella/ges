@@ -110,15 +110,21 @@ def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], debug=0):
     Data from a linear-gaussian SCM (generated using
     `sempler <https://github.com/juangamella/sempler>`__)
 
+    >>> import numpy as np
     >>> data = np.array([[3.23125779, 3.24950062, 13.430682, 24.67939513],
-                 [1.90913354, -0.06843781, 6.93957057, 16.10164608],
-                 [2.68547149, 1.88351553, 8.78711076, 17.18557716],
-                 [0.16850822, 1.48067393, 5.35871419, 11.82895779],
-                 [0.07355872, 1.06857039, 2.05006096, 3.07611922]])
+    ...                  [1.90913354, -0.06843781, 6.93957057, 16.10164608],
+    ...                  [2.68547149, 1.88351553, 8.78711076, 17.18557716],
+    ...                  [0.16850822, 1.48067393, 5.35871419, 11.82895779],
+    ...                  [0.07355872, 1.06857039, 2.05006096, 3.07611922]])
 
     Run GES using the gaussian BIC score:
 
+    >>> import ges
     >>> ges.fit_bic(data)
+    (array([[0, 1, 1, 0],
+           [0, 0, 0, 0],
+           [1, 1, 0, 1],
+           [0, 1, 1, 0]]), 15.674267611628313)
 
     """
     # Initialize Gaussian BIC score (precomputes scatter matrices, sets up cache)

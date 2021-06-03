@@ -105,7 +105,7 @@ class OverallGESTests(unittest.TestCase):
             start = time.time()
             # Estimate using this implementation
             # Test debugging output for the first 2 SCMs
-            estimate, _ = ges.fit_bic(obs_sample, debug=4 if i < 2 else 2)
+            estimate, _ = ges.fit_bic(obs_sample, iterate=True, debug=4 if i < 2 else 2)
             end = time.time()
             print("    GES-own done (%0.2f seconds)" % (end - start))
             self.assertTrue((estimate == estimate_cdt).all())
@@ -137,7 +137,7 @@ class OverallGESTests(unittest.TestCase):
             start = time.time()
             # Estimate using this implementation
             # Test debugging output for the first 2 SCMs
-            estimate, _ = ges.fit(score_class, debug=4 if i < 2 else 2)
+            estimate, _ = ges.fit(score_class, iterate=True, debug=4 if i < 2 else 2)
             end = time.time()
             print("    GES-own done (%0.2f seconds)" % (end - start))
             self.assertTrue((estimate == estimate_cdt).all())
@@ -169,7 +169,7 @@ class OverallGESTests(unittest.TestCase):
             start = time.time()
             # Estimate using this implementation
             # Test debugging output for the first 2 SCMs
-            estimate, _ = ges.fit(score_class, debug=4 if i < 2 else 2)
+            estimate, _ = ges.fit(score_class, iterate=True, debug=4 if i < 2 else 2)
             end = time.time()
             print("    GES-own done (%0.2f seconds)" % (end - start))
             self.assertTrue((estimate == estimate_cdt).all())

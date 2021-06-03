@@ -64,7 +64,7 @@ import ges.utils as utils
 from ges.scores.gauss_obs_l0_pen import GaussObsL0Pen
 
 
-def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], debug=0):
+def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], iterate=False, debug=0):
     """Run GES on the given data, using the Gaussian BIC score
     (l0-penalized Gaussian Likelihood). The data is not assumed to be
     centered, i.e. an intercept is fitted.
@@ -82,8 +82,11 @@ def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], debug=0):
         0` implies the edge `i - j`. Defaults to the empty graph
         (i.e. matrix of zeros).
     phases : [{'forward', 'backward', 'turning'}*], optional
-       Which phases of the GES procedure are run, and in which
-       order. Defaults to `['forward', 'backward', 'turning']`.
+        Which phases of the GES procedure are run, and in which
+        order. Defaults to `['forward', 'backward', 'turning']`.
+    iterate : bool, default=False
+        Indicates whether the given phases should be iterated more
+        than once.
     debug : int, optional
         If larger than 0, debug are traces printed. Higher values
         correspond to increased verbosity.
@@ -131,10 +134,10 @@ def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], debug=0):
     cache = GaussObsL0Pen(data)
     # Unless indicated otherwise, initialize to the empty graph
     A0 = np.zeros((cache.p, cache.p)) if A0 is None else A0
-    return fit(cache, A0, phases, debug)
+    return fit(cache, A0, phases, iterate, debug)
 
 
-def fit(score_class, A0=None, phases=['forward', 'backward', 'turning'], debug=0):
+def fit(score_class, A0=None, phases=['forward', 'backward', 'turning'], iterate=False, debug=0):
     """
     Run GES using a user defined score.
 
@@ -151,8 +154,11 @@ def fit(score_class, A0=None, phases=['forward', 'backward', 'turning'], debug=0
         != 0 implies i -> j and A[i,j] != 0 & A[j,i] != 0 implies i -
         j. Defaults to the empty graph.
     phases : [{'forward', 'backward', 'turning'}*], optional
-       which phases of the GES procedure are run, and in which
-       order. Defaults to ['forward', 'backward', 'turning'].
+        which phases of the GES procedure are run, and in which
+        order. Defaults to ['forward', 'backward', 'turning'].
+    iterate : bool, default=False
+        Indicates whether the given phases should be iterated more
+        than once.
     debug : int, optional
         if larger than 0, debug are traces printed. Higher values
         correspond to increased verbosity.
@@ -174,28 +180,32 @@ def fit(score_class, A0=None, phases=['forward', 'backward', 'turning'], debug=0
     total_score = 0
     A, score_change = A0, np.Inf
     # Run each phase
-    for phase in phases:
-        if phase == 'forward':
-            fun = forward_step
-        elif phase == 'backward':
-            fun = backward_step
-        elif phase == 'turning':
-            fun = turning_step
-        else:
-            raise ValueError('Invalid phase "%s" specified' % phase)
-        print("\nGES %s phase start" % phase) if debug else None
-        print("-------------------------") if debug else None
-        while True:
-            score_change, new_A = fun(A, score_class, max(0, debug - 1))
-            if score_change > 0:
-                A = utils.pdag_to_cpdag(new_A)
-                total_score += score_change
+    while True:
+        last_total_score = total_score
+        for phase in phases:
+            if phase == 'forward':
+                fun = forward_step
+            elif phase == 'backward':
+                fun = backward_step
+            elif phase == 'turning':
+                fun = turning_step
             else:
-                break
-        print("-----------------------") if debug else None
-        print("GES %s phase end" % phase) if debug else None
-        print("Total score: %0.4f" % total_score) if debug else None
-        [print(row) for row in A] if debug else None
+                raise ValueError('Invalid phase "%s" specified' % phase)
+            print("\nGES %s phase start" % phase) if debug else None
+            print("-------------------------") if debug else None
+            while True:
+                score_change, new_A = fun(A, score_class, max(0, debug - 1))
+                if score_change > 0:
+                    A = utils.pdag_to_cpdag(new_A)
+                    total_score += score_change
+                else:
+                    break
+            print("-----------------------") if debug else None
+            print("GES %s phase end" % phase) if debug else None
+            print("Total score: %0.4f" % total_score) if debug else None
+            [print(row) for row in A] if debug else None
+        if total_score <= last_total_score or not iterate:
+            break
     return A, total_score
 
 

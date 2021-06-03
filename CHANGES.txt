@@ -1,4 +1,4 @@
-v1.0.4, 2021-06-0?
+v1.0.4, 2021-06-03
   - Both ges.fit and ges.fit_bic now allow for an optional parameter `iterate`, to indicate whether the given phases should be iterated more than once. Defaults to `False` to maintain backwards compatibility.
   - Adapted tests.
 v1.0.3, 2021-05-21

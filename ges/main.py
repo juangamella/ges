@@ -64,7 +64,8 @@ import ges.utils as utils
 from ges.scores.gauss_obs_l0_pen import GaussObsL0Pen
 
 
-def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], iterate=False, debug=0):
+def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], iterate=False, debug=0,
+            fixed_gaps=None):
     """Run GES on the given data, using the Gaussian BIC score
     (l0-penalized Gaussian Likelihood). The data is not assumed to be
     centered, i.e. an intercept is fitted.
@@ -90,6 +91,9 @@ def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], iterate=Fa
     debug : int, optional
         If larger than 0, debug are traces printed. Higher values
         correspond to increased verbosity.
+    fixed_gaps : np.array, optional
+        logical symmetry matrix indicating forbidden edges.
+        Defaults to the empty graph.
 
     Returns
     -------
@@ -134,10 +138,11 @@ def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], iterate=Fa
     cache = GaussObsL0Pen(data)
     # Unless indicated otherwise, initialize to the empty graph
     A0 = np.zeros((cache.p, cache.p)) if A0 is None else A0
-    return fit(cache, A0, phases, iterate, debug)
+    return fit(cache, A0, phases, iterate, debug, fixed_gaps)
 
 
-def fit(score_class, A0=None, phases=['forward', 'backward', 'turning'], iterate=False, debug=0):
+def fit(score_class, A0=None, phases=['forward', 'backward', 'turning'], iterate=False, debug=0,
+        fixed_gaps=None):
     """
     Run GES using a user defined score.
 
@@ -162,6 +167,9 @@ def fit(score_class, A0=None, phases=['forward', 'backward', 'turning'], iterate
     debug : int, optional
         if larger than 0, debug are traces printed. Higher values
         correspond to increased verbosity.
+    fixed_gaps : np.array, optional
+        logical symmetry matrix indicating forbidden edges.
+        Defaults to the empty graph.
 
     Returns
     -------
@@ -176,6 +184,16 @@ def fit(score_class, A0=None, phases=['forward', 'backward', 'turning'], iterate
         raise ValueError("Must specify at least one phase")
     # Unless indicated otherwise, initialize to the empty graph
     A0 = np.zeros((score_class.p, score_class.p)) if A0 is None else A0
+    # Cast fixed_gaps into a set of edges
+    if fixed_gaps is not None:
+        if not isinstance(fixed_gaps, np.ndarray):
+            raise ValueError('Expect fixed_gaps to be numpy.ndarray')
+        if fixed_gaps.shape != (score_class.p, score_class.p):
+            raise ValueError('The dimension of fixed_gaps is different from the score')
+        fixed_gaps = fixed_gaps | fixed_gaps.T  # Enforce fixed_gaps to be symmetric
+        fixed_gaps = set(zip(*np.where(fixed_gaps)))
+    else:
+        fixed_gaps = set()
     # GES procedure
     total_score = 0
     A, score_change = A0, np.Inf
@@ -194,7 +212,8 @@ def fit(score_class, A0=None, phases=['forward', 'backward', 'turning'], iterate
             print("\nGES %s phase start" % phase) if debug else None
             print("-------------------------") if debug else None
             while True:
-                score_change, new_A = fun(A, score_class, max(0, debug - 1))
+                score_change, new_A = fun(A, score_class, max(0, debug - 1),
+                                          fixed_gaps=fixed_gaps)
                 if score_change > 0:
                     A = utils.pdag_to_cpdag(new_A)
                     total_score += score_change
@@ -209,7 +228,7 @@ def fit(score_class, A0=None, phases=['forward', 'backward', 'turning'], iterate
     return A, total_score
 
 
-def forward_step(A, cache, debug=0):
+def forward_step(A, cache, debug=0, **kwargs):
     """
     Scores all valid insert operators that can be applied to the current
     CPDAG A, and applies the highest scoring one.
@@ -236,9 +255,10 @@ def forward_step(A, cache, debug=0):
         operator (not yet a CPDAG).
 
     """
+    fixed_gaps = kwargs.get('fixed_gaps', set())
     # Construct edge candidates (i.e. edges between non-adjacent nodes)
     fro, to = np.where((A + A.T + np.eye(len(A))) == 0)
-    edge_candidates = list(zip(fro, to))
+    edge_candidates = list(set(zip(fro, to)) - fixed_gaps)
     # For each edge, enumerate and score all valid operators
     valid_operators = []
     print("  %d candidate edges" % len(edge_candidates)) if debug > 1 else None
@@ -256,7 +276,7 @@ def forward_step(A, cache, debug=0):
         return score, new_A
 
 
-def backward_step(A, cache, debug=0):
+def backward_step(A, cache, debug=0, **kwargs):
     """
     Scores all valid delete operators that can be applied to the current
     CPDAG A, and applies the highest scoring one.
@@ -309,7 +329,7 @@ def backward_step(A, cache, debug=0):
         return score, new_A
 
 
-def turning_step(A, cache, debug=0):
+def turning_step(A, cache, debug=0, **kwargs):
     """
     Scores all valid turn operators that can be applied to the current
     CPDAG A, and applies the highest scoring one.

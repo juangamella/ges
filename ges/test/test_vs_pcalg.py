@@ -49,7 +49,7 @@ import pandas as pd
 
 # ---------------------------------------------------------------------
 
-NUM_GRAPHS = 100
+NUM_GRAPHS = 500
 
 
 class OverallGESTests(unittest.TestCase):
@@ -132,7 +132,7 @@ class OverallGESTests(unittest.TestCase):
             # implementation of GES (package cdt)
             data = pd.DataFrame(obs_sample)
             score_class = ges.scores.gauss_obs_l0_pen.GaussObsL0Pen(obs_sample)
-            completion_algorithm = None if i % 2 == 0 else ges.utils.dag_to_cpdag
+            completion_algorithm = None if i % 2 == 0 else ges.utils.pdag_to_cpdag
             output = GES(verbose=True).predict(data)
             estimate_cdt = nx.to_numpy_array(output)
             end = time.time()

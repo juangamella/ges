@@ -127,7 +127,7 @@ def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], iterate=Fa
     (array([[0, 1, 1, 0],
            [0, 0, 0, 0],
            [1, 1, 0, 1],
-           [0, 1, 1, 0]]), 15.674267611628313)
+           [0, 1, 1, 0]]), 15.674267611628233)
 
     """
     # Initialize Gaussian BIC score (precomputes scatter matrices, sets up cache)

@@ -83,10 +83,12 @@ print(estimate, score)
 While [Chickering (2002)](https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf) chose the BIC score, any score-equivalent and locally decomposable function is adequate. To run with another score of your choice, you can use
 
 ```python
-ges.fit(score_class, A0 = None, phases = ['forward', 'backward', 'turning'], debug = 0)
+ges.fit(score_class, completion_algorithm = None, A0 = None, phases = ['forward', 'backward', 'turning'], debug = 0)
 ```
 
 where `score_class` is an instance of the class which implements your score. It should inherit from `ges.scores.DecomposableScore`, or define a `local_score` function and a few attributes (see [decomposable_score.py](https://github.com/juangamella/ges/blob/master/ges/scores/decomposable_score.py) for more details).
+
+You may additionally also use a custom completion algorithm , i.e. the algorithm to go from PDAG to CPDAG after the application of each operator.
 
 **Parameters**
 

@@ -1,3 +1,6 @@
+v1.0.5, 2021-11-03
+  - ges.fit now allows for an optional parameter `completion_algorithm` which allows for a user-defined algorithm to go from PDAG to CPDAG after the application of each operator.
+  - removed deprecated use of np.bool
 v1.0.4, 2021-06-03
   - Both ges.fit and ges.fit_bic now allow for an optional parameter `iterate`, to indicate whether the given phases should be iterated more than once. Defaults to `False` to maintain backwards compatibility.
   - Adapted tests.

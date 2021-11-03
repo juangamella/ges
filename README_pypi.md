@@ -25,7 +25,7 @@ Thus, **this implementation might be for you if**:
 
 **You should not use this implementation if:**
 
-- you have no interest in modifying GES itself, and
+- you have no interest in modifying GES itself, *and*
 - you care about speed, as the `pcalg` implementation is highly optimized and is **very** fast.
 
 ## Running the algorithm
@@ -85,14 +85,17 @@ print(estimate, score)
 While [Chickering (2002)](https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf) chose the BIC score, any score-equivalent and locally decomposable function is adequate. To run with another score of your choice, you can use
 
 ```python
-ges.fit(score_class, A0 = None, phases = ['forward', 'backward', 'turning'], debug = 0)
+ges.fit(score_class, completion_algorithm = None, A0 = None, phases = ['forward', 'backward', 'turning'], debug = 0)
 ```
 
 where `score_class` is an instance of the class which implements your score. It should inherit from `ges.scores.DecomposableScore`, or define a `local_score` function and a few attributes (see [decomposable_score.py](https://github.com/juangamella/ges/blob/master/ges/scores/decomposable_score.py) for more details).
 
+You may additionally also use a custom completion algorithm , i.e. the algorithm to go from PDAG to CPDAG after the application of each operator.
+
 **Parameters**
 
 - **score_class** (ges.scores.DecomposableScore): an instance of a class implementing a locally decomposable score, which inherits from `ges.scores.DecomposableScore`. See [decomposable_score.py](https://github.com/juangamella/ges/blob/master/ges/scores/decomposable_score.py) for more details.
+- **completion_algorithm** (function, optional): the used to go from PDAG to CPDAG after the application of each operator. Must be a function which takes and returns a PDAG adjacency. If `None`, the algorithm used in the original GES paper is used.
 - **A0** (np.array, optional): the initial CPDAG on which GES will run, where where `A0[i,j] != 0` implies `i -> j` and `A[i,j] != 0 & A[j,i] != 0` implies `i - j`. Defaults to the empty graph.
 - **phases** (`[{'forward', 'backward', 'turning'}*]`, optional): this controls which phases of the GES procedure are run, and in which order. Defaults to `['forward', 'backward', 'turning']`. The turning phase was found by [Hauser & Bühlmann (2012)](https://www.jmlr.org/papers/volume13/hauser12a/hauser12a.pdf) to improve estimation performace, and is implemented here too.
 - **debug** (int, optional): if larger than 0, debug are traces printed. Higher values correspond to increased verbosity.

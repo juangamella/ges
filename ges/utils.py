@@ -355,7 +355,7 @@ def induced_subgraph(S, G):
        really the subgraph, as the nodes not in S still appear as
        disconnected nodes.
     """
-    mask = np.zeros_like(G, dtype=np.bool)
+    mask = np.zeros_like(G, dtype=bool)
     mask[list(S), :] = True
     mask = np.logical_and(mask, mask.T)
     subgraph = np.zeros_like(G)

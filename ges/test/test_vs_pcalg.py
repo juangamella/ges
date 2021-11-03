@@ -40,6 +40,7 @@ import time
 
 import ges
 import ges.scores.gauss_obs_l0_pen
+import ges.utils
 
 # For CDT
 from cdt.causality.graph import GES
@@ -82,7 +83,7 @@ class OverallGESTests(unittest.TestCase):
 
     def test_vs_cdt_1(self):
         # Test that behaviour matches that of the implementation in
-        # the R package pcalg, using 500 randomly generated
+        # the R package pcalg, using NUM_GRAPHS randomly generated
         # Erdos-Renyi graphs. The call is made through the ges.fit_bic
         # function
         np.random.seed(15)
@@ -113,9 +114,10 @@ class OverallGESTests(unittest.TestCase):
 
     def test_vs_cdt_2(self):
         # Test that behaviour matches that of the implementation in
-        # the R package pcalg, using 500 randomly generated
+        # the R package pcalg, using NUM_GRAPHS randomly generated
         # Erdos-Renyi graphs. The call is made through the ges.fit
-        # function
+        # function; for half of the cases, manually specify the
+        # completion algorithm.
         np.random.seed(16)
         G = NUM_GRAPHS  # number of graphs
         p = 15  # number of variables
@@ -130,6 +132,7 @@ class OverallGESTests(unittest.TestCase):
             # implementation of GES (package cdt)
             data = pd.DataFrame(obs_sample)
             score_class = ges.scores.gauss_obs_l0_pen.GaussObsL0Pen(obs_sample)
+            completion_algorithm = None if i % 2 == 0 else ges.utils.dag_to_cpdag
             output = GES(verbose=True).predict(data)
             estimate_cdt = nx.to_numpy_array(output)
             end = time.time()
@@ -137,7 +140,8 @@ class OverallGESTests(unittest.TestCase):
             start = time.time()
             # Estimate using this implementation
             # Test debugging output for the first 2 SCMs
-            estimate, _ = ges.fit(score_class, iterate=True, debug=4 if i < 2 else 2)
+            estimate, _ = ges.fit(
+                score_class, completion_algorithm=completion_algorithm, iterate=True, debug=4 if i < 2 else 2)
             end = time.time()
             print("    GES-own done (%0.2f seconds)" % (end - start))
             self.assertTrue((estimate == estimate_cdt).all())
@@ -145,7 +149,7 @@ class OverallGESTests(unittest.TestCase):
 
     def test_vs_cdt_2_raw(self):
         # Test that behaviour matches that of the implementation in
-        # the R package pcalg, using 500 randomly generated
+        # the R package pcalg, using NUM_GRAPHS randomly generated
         # Erdos-Renyi graphs. The call is made through the ges.fit
         # function
         np.random.seed(17)

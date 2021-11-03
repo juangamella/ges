@@ -137,9 +137,8 @@ def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], iterate=Fa
     return fit(cache, A0, phases, iterate, debug)
 
 
-def fit(score_class, A0=None, phases=['forward', 'backward', 'turning'], iterate=False, debug=0):
-    """
-    Run GES using a user defined score.
+def fit(score_class, completion_algorithm=None, A0=None, phases=['forward', 'backward', 'turning'], iterate=False, debug=0):
+    """Run GES using a user defined score.
 
     Parameters
     ----------
@@ -148,7 +147,10 @@ def fit(score_class, A0=None, phases=['forward', 'backward', 'turning'], iterate
         ges.decomposable_score.DecomposableScore (or defines a
         local_score function and a p attribute, see
         ges.decomposable_score for more info).
-
+    completion_algorithm : function, optional
+        the "completion algorithm" used to go from PDAG to CPDAG after
+        the application of each operator. If `None`, the algorithm
+        used in the original GES paper is used.
     A0 : np.array, optional
         the initial CPDAG on which GES will run, where where A0[i,j]
         != 0 implies i -> j and A[i,j] != 0 & A[j,i] != 0 implies i -
@@ -174,6 +176,8 @@ def fit(score_class, A0=None, phases=['forward', 'backward', 'turning'], iterate
     # Select the desired phases
     if len(phases) == 0:
         raise ValueError("Must specify at least one phase")
+    # Set the completion algorithm
+    completion_algorithm = utils.pdag_to_cpdag if completion_algorithm is None else completion_algorithm
     # Unless indicated otherwise, initialize to the empty graph
     A0 = np.zeros((score_class.p, score_class.p)) if A0 is None else A0
     # GES procedure
@@ -196,7 +200,7 @@ def fit(score_class, A0=None, phases=['forward', 'backward', 'turning'], iterate
             while True:
                 score_change, new_A = fun(A, score_class, max(0, debug - 1))
                 if score_change > 0:
-                    A = utils.pdag_to_cpdag(new_A)
+                    A = completion_algorithm(new_A)
                     total_score += score_change
                 else:
                     break
@@ -440,10 +444,10 @@ def score_valid_insert_operators(x, y, A, cache, debug=0):
     # if they pass validity condition 2 (see below)
     T0 = sorted(utils.neighbors(y, A) - utils.adj(x, A))
     if len(T0) == 0:
-        subsets = np.zeros((1, p + 1), dtype=np.bool)
+        subsets = np.zeros((1, p + 1), dtype=bool)
     else:
-        subsets = np.zeros((2**len(T0), p + 1), dtype=np.bool)
-        subsets[:, T0] = utils.cartesian([np.array([False, True])] * len(T0), dtype=np.bool)
+        subsets = np.zeros((2**len(T0), p + 1), dtype=bool)
+        subsets[:, T0] = utils.cartesian([np.array([False, True])] * len(T0), dtype=bool)
     valid_operators = []
     print("    insert(%d,%d) T0=" % (x, y), set(T0)) if debug > 1 else None
     while len(subsets) > 0:
@@ -589,10 +593,10 @@ def score_valid_delete_operators(x, y, A, cache, debug=0):
     H0 = sorted(na_yx)
     p = len(A)
     if len(H0) == 0:
-        subsets = np.zeros((1, (p + 1)), dtype=np.bool)
+        subsets = np.zeros((1, (p + 1)), dtype=bool)
     else:
-        subsets = np.zeros((2**len(H0), (p + 1)), dtype=np.bool)
-        subsets[:, H0] = utils.cartesian([np.array([False, True])] * len(H0), dtype=np.bool)
+        subsets = np.zeros((2**len(H0), (p + 1)), dtype=bool)
+        subsets[:, H0] = utils.cartesian([np.array([False, True])] * len(H0), dtype=bool)
     valid_operators = []
     print("    delete(%d,%d) H0=" % (x, y), set(H0)) if debug > 1 else None
     while len(subsets) > 0:
@@ -753,10 +757,10 @@ def score_valid_turn_operators_dir(x, y, A, cache, debug=0):
     p = len(A)
     T0 = sorted(utils.neighbors(y, A) - utils.adj(x, A))
     if len(T0) == 0:
-        subsets = np.zeros((1, p + 1), dtype=np.bool)
+        subsets = np.zeros((1, p + 1), dtype=bool)
     else:
-        subsets = np.zeros((2**len(T0), p + 1), dtype=np.bool)
-        subsets[:, T0] = utils.cartesian([np.array([False, True])] * len(T0), dtype=np.bool)
+        subsets = np.zeros((2**len(T0), p + 1), dtype=bool)
+        subsets[:, T0] = utils.cartesian([np.array([False, True])] * len(T0), dtype=bool)
     valid_operators = []
     print("    turn(%d,%d) T0=" % (x, y), set(T0)) if debug > 1 else None
     while len(subsets) > 0:
@@ -858,8 +862,8 @@ def score_valid_turn_operators_undir(x, y, A, cache, debug=0):
     # one which is not adjacent to x
     p = len(A)
     C0 = sorted(utils.neighbors(y, A) - {x})
-    subsets = np.zeros((2**len(C0), p + 1), dtype=np.bool)
-    subsets[:, C0] = utils.cartesian([np.array([False, True])] * len(C0), dtype=np.bool)
+    subsets = np.zeros((2**len(C0), p + 1), dtype=bool)
+    subsets[:, C0] = utils.cartesian([np.array([False, True])] * len(C0), dtype=bool)
     # Remove all subsets which do not contain at least one non-adjacent node to x
     to_remove = (subsets[:, non_adjacents] == False).all(axis=1)
     subsets = utils.delete(subsets, to_remove, axis=0)

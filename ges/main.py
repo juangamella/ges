@@ -134,7 +134,7 @@ def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], iterate=Fa
     cache = GaussObsL0Pen(data)
     # Unless indicated otherwise, initialize to the empty graph
     A0 = np.zeros((cache.p, cache.p)) if A0 is None else A0
-    return fit(cache, A0, phases, iterate, debug)
+    return fit(cache, None, A0, phases, iterate, debug)
 
 
 def fit(score_class, completion_algorithm=None, A0=None, phases=['forward', 'backward', 'turning'], iterate=False, debug=0):

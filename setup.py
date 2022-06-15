@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='ges',
-    version='1.0.6',
+    version='1.1.0',
     author='Juan L Gamella',
     author_email='juangamella@gmail.com',
     packages=['ges', 'ges.test', 'ges.scores'],

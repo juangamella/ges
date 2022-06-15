@@ -1,3 +1,7 @@
+v1.1.0, 2022-06-15
+  - Fixed bug: The calls ges.fit and ges.fit_bic now return the total score, instead of the total score change wrt. the empty graph.
+  - Set a minimum value (float machine epsilon) for the estimated noise term variances. For very low sample sizes noise-term variances can be estimated as zero because of machine precision, breaking the logarithm in the likelihood computation.
+  - When checking if an operator improved the score, require it to be greater than a threshold (instead of zero); because of numerical issues, two opposing turn operators (idemptotent when applied together) may both return a score slightly over-zero; as a result the algorithm gets stuck in a loop.
 v1.0.6, 2021-11-03
   - Updated MANIFEST.in file to include readme and license.
 v1.0.5, 2021-11-03

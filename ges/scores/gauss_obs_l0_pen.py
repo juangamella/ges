@@ -237,4 +237,9 @@ class GaussObsL0Pen(DecomposableScore):
                 coef = np.linalg.solve(cov_parents, cov_j)
                 sigma = sigma - cov_j @ coef
                 b[parents] = coef
+        # For very low sample-sizes sigma can become lower than or
+        # zero -> set to machine epsilon to avoid log(0) in the
+        # likelihood computation
+        if sigma <= 0:
+            sigma = abs(np.finfo(float).eps)
         return b, sigma

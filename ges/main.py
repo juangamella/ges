@@ -181,7 +181,7 @@ def fit(score_class, completion_algorithm=None, A0=None, phases=['forward', 'bac
     # Unless indicated otherwise, initialize to the empty graph
     A0 = np.zeros((score_class.p, score_class.p)) if A0 is None else A0
     # GES procedure
-    total_score = 0
+    total_score = score_class.full_score(A0)
     A, score_change = A0, np.Inf
     # Run each phase
     while True:
@@ -199,7 +199,7 @@ def fit(score_class, completion_algorithm=None, A0=None, phases=['forward', 'bac
             print("-------------------------") if debug else None
             while True:
                 score_change, new_A = fun(A, score_class, max(0, debug - 1))
-                if score_change > 0:
+                if score_change > 1e-6:
                     A = completion_algorithm(new_A)
                     total_score += score_change
                 else:

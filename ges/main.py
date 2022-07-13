@@ -254,9 +254,10 @@ def forward_step(A, cache, debug=0):
         return 0, A
     else:
         scores = [op[0] for op in valid_operators]
-        score, new_A, x, y, T = valid_operators[np.argmax(scores)]
+        score, x, y, T = valid_operators[np.argmax(scores)]        
         print("  Best operator: insert(%d, %d, %s) -> (%0.4f)" %
               (x, y, T, score)) if debug else None
+        new_A = insert(x,y,T,A)
         return score, new_A
 
 
@@ -307,9 +308,10 @@ def backward_step(A, cache, debug=0):
         return 0, A
     else:
         scores = [op[0] for op in valid_operators]
-        score, new_A, x, y, H = valid_operators[np.argmax(scores)]
+        score, x, y, H = valid_operators[np.argmax(scores)]
         print("  Best operator: delete(%d, %d, %s) -> (%0.4f)" %
               (x, y, H, score)) if debug else None
+        new_A = delete(x, y, H, A)
         return score, new_A
 
 
@@ -356,8 +358,9 @@ def turning_step(A, cache, debug=0):
         return 0, A
     else:
         scores = [op[0] for op in valid_operators]
-        score, new_A, x, y, C = valid_operators[np.argmax(scores)]
+        score, x, y, C = valid_operators[np.argmax(scores)]
         print("  Best operator: turn(%d, %d, %s) -> (%0.4f)" % (x, y, C, score)) if debug else None
+        new_A = turn(x, y, C, A)
         return score, new_A
 
 # --------------------------------------------------------------------
@@ -486,8 +489,6 @@ def score_valid_insert_operators(x, y, A, cache, debug=0):
               na_yxT, "validity:", cond_1, cond_2) if debug > 1 else None
         # If both conditions hold, apply operator and compute its score
         if cond_1 and cond_2:
-            # Apply operator
-            new_A = insert(x, y, T, A)
             # Compute the change in score
             aux = na_yxT | utils.pa(y, A)
             old_score = cache.local_score(y, aux)
@@ -495,7 +496,7 @@ def score_valid_insert_operators(x, y, A, cache, debug=0):
             print("        new: s(%d, %s) = %0.6f old: s(%d, %s) = %0.6f" %
                   (y, aux | {x}, new_score, y, aux, old_score)) if debug > 1 else None
             # Add to the list of valid operators
-            valid_operators.append((new_score - old_score, new_A, x, y, T))
+            valid_operators.append((new_score - old_score, x, y, T))
             print("    insert(%d,%d,%s) -> %0.16f" %
                   (x, y, T, new_score - old_score)) if debug else None
     # Return all the valid operators
@@ -619,8 +620,6 @@ def score_valid_delete_operators(x, y, A, cache, debug=0):
         print("      delete(%d,%d,%s)" % (x, y, H), "na_yx - H = ",
               na_yx - set(H), "validity:", cond_1) if debug > 1 else None
         if cond_1:
-            # Apply operator
-            new_A = delete(x, y, H, A)
             # Compute the change in score
             aux = (na_yx - set(H)) | utils.pa(y, A) | {x}
             # print(x,y,H,"na_yx:",na_yx,"old:",aux,"new:", aux - {x})
@@ -629,7 +628,7 @@ def score_valid_delete_operators(x, y, A, cache, debug=0):
             print("        new: s(%d, %s) = %0.6f old: s(%d, %s) = %0.6f" %
                   (y, aux - {x}, new_score, y, aux, old_score)) if debug > 1 else None
             # Add to the list of valid operators
-            valid_operators.append((new_score - old_score, new_A, x, y, H))
+            valid_operators.append((new_score - old_score, x, y, H))
             print("    delete(%d,%d,%s) -> %0.16f" %
                   (x, y, H, new_score - old_score)) if debug else None
     # Return all the valid operators
@@ -803,8 +802,6 @@ def score_valid_turn_operators_dir(x, y, A, cache, debug=0):
         print("      turn(%d,%d,%s)" % (x, y, C), "na_yx =", utils.na(y, x, A),
               "T =", T, "validity:", cond_1, cond_2) if debug > 1 else None
         if cond_1 and cond_2:
-            # Apply operator
-            new_A = turn(x, y, C, A)
             # Compute the change in score
             new_score = cache.local_score(y, utils.pa(
                 y, A) | C | {x}) + cache.local_score(x, utils.pa(x, A) - {y})
@@ -813,7 +810,7 @@ def score_valid_turn_operators_dir(x, y, A, cache, debug=0):
             print("        new score = %0.6f, old score = %0.6f, y=%d, C=%s" %
                   (new_score, old_score, y, C)) if debug > 1 else None
             # Add to the list of valid operators
-            valid_operators.append((new_score - old_score, new_A, x, y, C))
+            valid_operators.append((new_score - old_score, x, y, C))
             print("    turn(%d,%d,%s) -> %0.16f" %
                   (x, y, C, new_score - old_score)) if debug else None
     # Return all the valid operators
@@ -901,8 +898,6 @@ def score_valid_turn_operators_undir(x, y, A, cache, debug=0):
         if not utils.separates({x, y}, C, na_yx - C, subgraph):
             continue
         # At this point C passes both conditions
-        #   Apply operator
-        new_A = turn(x, y, C, A)
         #   Compute the change in score
         new_score = cache.local_score(y, utils.pa(
             y, A) | C | {x}) + cache.local_score(x, utils.pa(x, A) | (C & na_yx))
@@ -911,7 +906,7 @@ def score_valid_turn_operators_undir(x, y, A, cache, debug=0):
         print("        new score = %0.6f, old score = %0.6f, y=%d, C=%s" %
               (new_score, old_score, y, C)) if debug > 1 else None
         #   Add to the list of valid operators
-        valid_operators.append((new_score - old_score, new_A, x, y, C))
+        valid_operators.append((new_score - old_score, x, y, C))
         print("    turn(%d,%d,%s) -> %0.16f" % (x, y, C, new_score - old_score)) if debug else None
     # Return all valid operators
     return valid_operators

@@ -64,7 +64,9 @@ import ges.utils as utils
 from ges.scores.gauss_obs_l0_pen import GaussObsL0Pen
 
 
-def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], iterate=False, debug=0):
+def fit_bic(
+    data, A0=None, phases=["forward", "backward", "turning"], iterate=False, debug=0
+):
     """Run GES on the given data, using the Gaussian BIC score
     (l0-penalized Gaussian Likelihood). The data is not assumed to be
     centered, i.e. an intercept is fitted.
@@ -85,8 +87,8 @@ def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], iterate=Fa
         Which phases of the GES procedure are run, and in which
         order. Defaults to `['forward', 'backward', 'turning']`.
     iterate : bool, default=False
-        Indicates whether the given phases should be iterated more
-        than once.
+        Indicates whether the algorithm should repeat the given phases
+        more than once, until the score is not improved.
     debug : int, optional
         If larger than 0, debug are traces printed. Higher values
         correspond to increased verbosity.
@@ -137,7 +139,14 @@ def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], iterate=Fa
     return fit(cache, None, A0, phases, iterate, debug)
 
 
-def fit(score_class, completion_algorithm=None, A0=None, phases=['forward', 'backward', 'turning'], iterate=False, debug=0):
+def fit(
+    score_class,
+    completion_algorithm=None,
+    A0=None,
+    phases=["forward", "backward", "turning"],
+    iterate=False,
+    debug=0,
+):
     """Run GES using a user defined score.
 
     Parameters
@@ -159,8 +168,8 @@ def fit(score_class, completion_algorithm=None, A0=None, phases=['forward', 'bac
         which phases of the GES procedure are run, and in which
         order. Defaults to ['forward', 'backward', 'turning'].
     iterate : bool, default=False
-        Indicates whether the given phases should be iterated more
-        than once.
+        Indicates whether the algorithm should repeat the given phases
+        more than once, until the score is not improved.
     debug : int, optional
         if larger than 0, debug are traces printed. Higher values
         correspond to increased verbosity.
@@ -177,7 +186,9 @@ def fit(score_class, completion_algorithm=None, A0=None, phases=['forward', 'bac
     if len(phases) == 0:
         raise ValueError("Must specify at least one phase")
     # Set the completion algorithm
-    completion_algorithm = utils.pdag_to_cpdag if completion_algorithm is None else completion_algorithm
+    completion_algorithm = (
+        utils.pdag_to_cpdag if completion_algorithm is None else completion_algorithm
+    )
     # Unless indicated otherwise, initialize to the empty graph
     A0 = np.zeros((score_class.p, score_class.p)) if A0 is None else A0
     # GES procedure
@@ -187,11 +198,11 @@ def fit(score_class, completion_algorithm=None, A0=None, phases=['forward', 'bac
     while True:
         last_total_score = total_score
         for phase in phases:
-            if phase == 'forward':
+            if phase == "forward":
                 fun = forward_step
-            elif phase == 'backward':
+            elif phase == "backward":
                 fun = backward_step
-            elif phase == 'turning':
+            elif phase == "turning":
                 fun = turning_step
             else:
                 raise ValueError('Invalid phase "%s" specified' % phase)
@@ -247,14 +258,16 @@ def forward_step(A, cache, debug=0):
     valid_operators = []
     print("  %d candidate edges" % len(edge_candidates)) if debug > 1 else None
     for (x, y) in edge_candidates:
-        valid_operators += score_valid_insert_operators(x, y, A, cache, debug=max(0, debug - 1))
+        valid_operators += score_valid_insert_operators(
+            x, y, A, cache, debug=max(0, debug - 1)
+        )
     # Pick the edge/operator with the highest score
     if len(valid_operators) == 0:
         print("  No valid insert operators remain") if debug else None
         return 0, A
     else:
         scores = [op[0] for op in valid_operators]
-        score, x, y, T = valid_operators[np.argmax(scores)]        
+        score, x, y, T = valid_operators[np.argmax(scores)]
         print("  Best operator: insert(%d, %d, %s) -> (%0.4f)" %
               (x, y, T, score)) if debug else None
         new_A = insert(x,y,T,A)
@@ -301,7 +314,9 @@ def backward_step(A, cache, debug=0):
     valid_operators = []
     print("  %d candidate edges" % len(edge_candidates)) if debug > 1 else None
     for (x, y) in edge_candidates:
-        valid_operators += score_valid_delete_operators(x, y, A, cache, debug=max(0, debug - 1))
+        valid_operators += score_valid_delete_operators(
+            x, y, A, cache, debug=max(0, debug - 1)
+        )
     # Pick the edge/operator with the highest score
     if len(valid_operators) == 0:
         print("  No valid delete operators remain") if debug else None
@@ -351,7 +366,9 @@ def turning_step(A, cache, debug=0):
     valid_operators = []
     print("  %d candidate edges" % len(edge_candidates)) if debug > 1 else None
     for (x, y) in edge_candidates:
-        valid_operators += score_valid_turn_operators(x, y, A, cache, debug=max(0, debug - 1))
+        valid_operators += score_valid_turn_operators(
+            x, y, A, cache, debug=max(0, debug - 1)
+        )
     # Pick the edge/operator with the highest score
     if len(valid_operators) == 0:
         print("  No valid turn operators remain") if debug else None
@@ -362,6 +379,7 @@ def turning_step(A, cache, debug=0):
         print("  Best operator: turn(%d, %d, %s) -> (%0.4f)" % (x, y, C, score)) if debug else None
         new_A = turn(x, y, C, A)
         return score, new_A
+
 
 # --------------------------------------------------------------------
 # Insert operator
@@ -449,13 +467,17 @@ def score_valid_insert_operators(x, y, A, cache, debug=0):
     if len(T0) == 0:
         subsets = np.zeros((1, p + 1), dtype=bool)
     else:
-        subsets = np.zeros((2**len(T0), p + 1), dtype=bool)
-        subsets[:, T0] = utils.cartesian([np.array([False, True])] * len(T0), dtype=bool)
+        subsets = np.zeros((2 ** len(T0), p + 1), dtype=bool)
+        subsets[:, T0] = utils.cartesian(
+            [np.array([False, True])] * len(T0), dtype=bool
+        )
     valid_operators = []
     print("    insert(%d,%d) T0=" % (x, y), set(T0)) if debug > 1 else None
     while len(subsets) > 0:
-        print("      len(subsets)=%d, len(valid_operators)=%d" %
-              (len(subsets), len(valid_operators))) if debug > 1 else None
+        print(
+            "      len(subsets)=%d, len(valid_operators)=%d"
+            % (len(subsets), len(valid_operators))
+        ) if debug > 1 else None
         # Access the next subset
         T = np.where(subsets[0, :-1])[0]
         passed_cond_2 = subsets[0, -1]
@@ -485,22 +507,31 @@ def score_valid_insert_operators(x, y, A, cache, debug=0):
                 # If condition 2 holds for NA_yx U T, then it holds for all supersets of T
                 supersets = subsets[:, T].all(axis=1)
                 subsets[supersets, -1] = True
-        print("      insert(%d,%d,%s)" % (x, y, T), "na_yx U T = ",
-              na_yxT, "validity:", cond_1, cond_2) if debug > 1 else None
+        print(
+            "      insert(%d,%d,%s)" % (x, y, T),
+            "na_yx U T = ",
+            na_yxT,
+            "validity:",
+            cond_1,
+            cond_2,
+        ) if debug > 1 else None
         # If both conditions hold, apply operator and compute its score
         if cond_1 and cond_2:
             # Compute the change in score
             aux = na_yxT | utils.pa(y, A)
             old_score = cache.local_score(y, aux)
             new_score = cache.local_score(y, aux | {x})
-            print("        new: s(%d, %s) = %0.6f old: s(%d, %s) = %0.6f" %
-                  (y, aux | {x}, new_score, y, aux, old_score)) if debug > 1 else None
+            print(
+                "        new: s(%d, %s) = %0.6f old: s(%d, %s) = %0.6f"
+                % (y, aux | {x}, new_score, y, aux, old_score)
+            ) if debug > 1 else None
             # Add to the list of valid operators
             valid_operators.append((new_score - old_score, x, y, T))
             print("    insert(%d,%d,%s) -> %0.16f" %
                   (x, y, T, new_score - old_score)) if debug else None
     # Return all the valid operators
     return valid_operators
+
 
 # --------------------------------------------------------------------
 # Delete operator
@@ -545,7 +576,9 @@ def delete(x, y, H, A):
     na_yx = utils.na(y, x, A)
     if not H <= na_yx:
         raise ValueError(
-            "The given set H is not valid, H=%s is not a subset of NA_yx=%s" % (H, na_yx))
+            "The given set H is not valid, H=%s is not a subset of NA_yx=%s"
+            % (H, na_yx)
+        )
     # Apply operator
     new_A = A.copy()
     # delete the edge between x and y
@@ -596,13 +629,17 @@ def score_valid_delete_operators(x, y, A, cache, debug=0):
     if len(H0) == 0:
         subsets = np.zeros((1, (p + 1)), dtype=bool)
     else:
-        subsets = np.zeros((2**len(H0), (p + 1)), dtype=bool)
-        subsets[:, H0] = utils.cartesian([np.array([False, True])] * len(H0), dtype=bool)
+        subsets = np.zeros((2 ** len(H0), (p + 1)), dtype=bool)
+        subsets[:, H0] = utils.cartesian(
+            [np.array([False, True])] * len(H0), dtype=bool
+        )
     valid_operators = []
     print("    delete(%d,%d) H0=" % (x, y), set(H0)) if debug > 1 else None
     while len(subsets) > 0:
-        print("      len(subsets)=%d, len(valid_operators)=%d" %
-              (len(subsets), len(valid_operators))) if debug > 1 else None
+        print(
+            "      len(subsets)=%d, len(valid_operators)=%d"
+            % (len(subsets), len(valid_operators))
+        ) if debug > 1 else None
         # Access the next subset
         H = np.where(subsets[0, :-1])[0]
         cond_1 = subsets[0, -1]
@@ -617,22 +654,30 @@ def score_valid_delete_operators(x, y, A, cache, debug=0):
             supersets = subsets[:, H].all(axis=1)
             subsets[supersets, -1] = True
         # If the validity condition holds, apply operator and compute its score
-        print("      delete(%d,%d,%s)" % (x, y, H), "na_yx - H = ",
-              na_yx - set(H), "validity:", cond_1) if debug > 1 else None
+        print(
+            "      delete(%d,%d,%s)" % (x, y, H),
+            "na_yx - H = ",
+            na_yx - set(H),
+            "validity:",
+            cond_1,
+        ) if debug > 1 else None
         if cond_1:
             # Compute the change in score
             aux = (na_yx - set(H)) | utils.pa(y, A) | {x}
             # print(x,y,H,"na_yx:",na_yx,"old:",aux,"new:", aux - {x})
             old_score = cache.local_score(y, aux)
             new_score = cache.local_score(y, aux - {x})
-            print("        new: s(%d, %s) = %0.6f old: s(%d, %s) = %0.6f" %
-                  (y, aux - {x}, new_score, y, aux, old_score)) if debug > 1 else None
+            print(
+                "        new: s(%d, %s) = %0.6f old: s(%d, %s) = %0.6f"
+                % (y, aux - {x}, new_score, y, aux, old_score)
+            ) if debug > 1 else None
             # Add to the list of valid operators
             valid_operators.append((new_score - old_score, x, y, H))
             print("    delete(%d,%d,%s) -> %0.16f" %
                   (x, y, H, new_score - old_score)) if debug else None
     # Return all the valid operators
     return valid_operators
+
 
 # --------------------------------------------------------------------
 # Turn operator
@@ -758,13 +803,17 @@ def score_valid_turn_operators_dir(x, y, A, cache, debug=0):
     if len(T0) == 0:
         subsets = np.zeros((1, p + 1), dtype=bool)
     else:
-        subsets = np.zeros((2**len(T0), p + 1), dtype=bool)
-        subsets[:, T0] = utils.cartesian([np.array([False, True])] * len(T0), dtype=bool)
+        subsets = np.zeros((2 ** len(T0), p + 1), dtype=bool)
+        subsets[:, T0] = utils.cartesian(
+            [np.array([False, True])] * len(T0), dtype=bool
+        )
     valid_operators = []
     print("    turn(%d,%d) T0=" % (x, y), set(T0)) if debug > 1 else None
     while len(subsets) > 0:
-        print("      len(subsets)=%d, len(valid_operators)=%d" %
-              (len(subsets), len(valid_operators))) if debug > 1 else None
+        print(
+            "      len(subsets)=%d, len(valid_operators)=%d"
+            % (len(subsets), len(valid_operators))
+        ) if debug > 1 else None
         # Access the next subset
         T = np.where(subsets[0, :-1])[0]
         passed_cond_2 = subsets[0, -1]
@@ -799,16 +848,28 @@ def score_valid_turn_operators_dir(x, y, A, cache, debug=0):
                 supersets = subsets[:, T].all(axis=1)
                 subsets[supersets, -1] = True
         # If both conditions hold, apply operator and compute its score
-        print("      turn(%d,%d,%s)" % (x, y, C), "na_yx =", utils.na(y, x, A),
-              "T =", T, "validity:", cond_1, cond_2) if debug > 1 else None
+        print(
+            "      turn(%d,%d,%s)" % (x, y, C),
+            "na_yx =",
+            utils.na(y, x, A),
+            "T =",
+            T,
+            "validity:",
+            cond_1,
+            cond_2,
+        ) if debug > 1 else None
         if cond_1 and cond_2:
             # Compute the change in score
-            new_score = cache.local_score(y, utils.pa(
-                y, A) | C | {x}) + cache.local_score(x, utils.pa(x, A) - {y})
-            old_score = cache.local_score(y, utils.pa(y, A) | C) + \
-                cache.local_score(x, utils.pa(x, A))
-            print("        new score = %0.6f, old score = %0.6f, y=%d, C=%s" %
-                  (new_score, old_score, y, C)) if debug > 1 else None
+            new_score = cache.local_score(
+                y, utils.pa(y, A) | C | {x}
+            ) + cache.local_score(x, utils.pa(x, A) - {y})
+            old_score = cache.local_score(y, utils.pa(y, A) | C) + cache.local_score(
+                x, utils.pa(x, A)
+            )
+            print(
+                "        new score = %0.6f, old score = %0.6f, y=%d, C=%s"
+                % (new_score, old_score, y, C)
+            ) if debug > 1 else None
             # Add to the list of valid operators
             valid_operators.append((new_score - old_score, x, y, C))
             print("    turn(%d,%d,%s) -> %0.16f" %
@@ -852,14 +913,16 @@ def score_valid_turn_operators_undir(x, y, A, cache, debug=0):
     # then there are no valid operators.
     non_adjacents = list(utils.neighbors(y, A) - utils.adj(x, A) - {x})
     if len(non_adjacents) == 0:
-        print("    turn(%d,%d) : ne(y) \\ adj(x) = Ø => stopping" % (x, y)) if debug > 1 else None
+        print(
+            "    turn(%d,%d) : ne(y) \\ adj(x) = Ø => stopping" % (x, y)
+        ) if debug > 1 else None
         return []
     # Otherwise, construct all the possible subsets which will satisfy
     # condition (ii), i.e. all subsets of neighbors of y with at least
     # one which is not adjacent to x
     p = len(A)
     C0 = sorted(utils.neighbors(y, A) - {x})
-    subsets = np.zeros((2**len(C0), p + 1), dtype=bool)
+    subsets = np.zeros((2 ** len(C0), p + 1), dtype=bool)
     subsets[:, C0] = utils.cartesian([np.array([False, True])] * len(C0), dtype=bool)
     # Remove all subsets which do not contain at least one non-adjacent node to x
     to_remove = (subsets[:, non_adjacents] == False).all(axis=1)
@@ -869,8 +932,10 @@ def score_valid_turn_operators_undir(x, y, A, cache, debug=0):
     valid_operators = []
     print("    turn(%d,%d) C0=" % (x, y), set(C0)) if debug > 1 else None
     while len(subsets) > 0:
-        print("      len(subsets)=%d, len(valid_operators)=%d" %
-              (len(subsets), len(valid_operators))) if debug > 1 else None
+        print(
+            "      len(subsets)=%d, len(valid_operators)=%d"
+            % (len(subsets), len(valid_operators))
+        ) if debug > 1 else None
         # Access the next subset
         C = set(np.where(subsets[0, :])[0])
         subsets = subsets[1:]
@@ -899,12 +964,16 @@ def score_valid_turn_operators_undir(x, y, A, cache, debug=0):
             continue
         # At this point C passes both conditions
         #   Compute the change in score
-        new_score = cache.local_score(y, utils.pa(
-            y, A) | C | {x}) + cache.local_score(x, utils.pa(x, A) | (C & na_yx))
-        old_score = cache.local_score(y, utils.pa(y, A) | C) + \
-            cache.local_score(x, utils.pa(x, A) | (C & na_yx) | {y})
-        print("        new score = %0.6f, old score = %0.6f, y=%d, C=%s" %
-              (new_score, old_score, y, C)) if debug > 1 else None
+        new_score = cache.local_score(y, utils.pa(y, A) | C | {x}) + cache.local_score(
+            x, utils.pa(x, A) | (C & na_yx)
+        )
+        old_score = cache.local_score(y, utils.pa(y, A) | C) + cache.local_score(
+            x, utils.pa(x, A) | (C & na_yx) | {y}
+        )
+        print(
+            "        new score = %0.6f, old score = %0.6f, y=%d, C=%s"
+            % (new_score, old_score, y, C)
+        ) if debug > 1 else None
         #   Add to the list of valid operators
         valid_operators.append((new_score - old_score, x, y, C))
         print("    turn(%d,%d,%s) -> %0.16f" % (x, y, C, new_score - old_score)) if debug else None
@@ -913,6 +982,7 @@ def score_valid_turn_operators_undir(x, y, A, cache, debug=0):
 
 
 # To run the doctests
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
+
     doctest.testmod(extraglobs={}, verbose=True)

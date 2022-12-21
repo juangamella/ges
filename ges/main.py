@@ -62,7 +62,14 @@ Additional modules / packages:
 import numpy as np
 import ges.utils as utils
 from ges.scores.gauss_obs_l0_pen import GaussObsL0Pen
+from ges.scores.nml_pen import NmlPen
 
+def fit_nml(data, A0=None, phases=['forward', 'backward', 'turning'], iterate=False, debug=0):
+    # Initialize Gaussian BIC score (precomputes scatter matrices, sets up cache)
+    cache = NmlPen(data)
+    # Unless indicated otherwise, initialize to the empty graph
+    A0 = np.zeros((cache.p, cache.p)) if A0 is None else A0
+    return fit(cache, None, A0, phases, iterate, debug)
 
 def fit_bic(data, A0=None, phases=['forward', 'backward', 'turning'], iterate=False, debug=0):
     """Run GES on the given data, using the Gaussian BIC score

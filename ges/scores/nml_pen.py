@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from collections import Counter, defaultdict
@@ -14,7 +15,7 @@ class NmlPen(DecomposableScore):
 
         """
 
-        super().__init__(data, cache=cache, degug=debug)
+        super().__init__(data, cache=cache, debug=debug)
 
         self.data = data
         self.n, self.p = data.shape
@@ -48,9 +49,10 @@ class NmlPen(DecomposableScore):
         if len(pa):
             return self._endogenous_score(x, pa)
         else:
-            return seld._exogenous_local(x)
+            return self._exogenous_score(x)
 
     def _endogenous_score(self, x, pa):
+        pa = list(pa)
         x_data = self.data[:, x]
         le_ = LabelEncoder()
         pa_data = np.array(["".join(str(row)) for row in self.data[:, pa]])
@@ -59,13 +61,13 @@ class NmlPen(DecomposableScore):
         # Compute log-likelihood
         f = map_to_majority(pa_data, x_data)
         f = update_regression(pa_data, x_data, f)
-        loglikelihood += cause_effect_negloglikelihood(x_data, pa_data)
+        likelihood = cause_effect_negloglikelihood(pa_data, x_data, f)
         # Compute penalty term
         nml_term = (len(set(pa_data)) - 1) * np.log(len(set(x_data)))
         score = likelihood + nml_term
         return score
 
-    def _exogenous_local(self, x):
+    def _exogenous_score(self, x):
         likelihood = 0
         x_data = self.data[:, x]
         x_freqs = Counter(x_data)

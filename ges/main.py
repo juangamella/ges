@@ -206,7 +206,7 @@ def fit(score_class, completion_algorithm=None, A0=None, phases=['forward', 'bac
             print("-------------------------") if debug else None
             while True:
                 score_change, new_A = fun(A, score_class, max(0, debug - 1))
-                if score_change > 1e-6:
+                if - score_change > 1e-6:
 #                    A = completion_algorithm(new_A)
                     A = new_A
                     total_score += score_change
@@ -502,8 +502,10 @@ def score_valid_insert_operators(x, y, A, cache, debug=0):
             new_A = insert(x, y, T, A)
             # Compute the change in score
             aux = na_yxT | utils.pa(y, A)
-            old_score = cache.local_score(y, aux)
-            new_score = cache.local_score(y, aux | {x})
+            #old_score = cache.local_score(y, aux)
+            old_score = cache.full_score(A)
+            new_score = cache.full_score(new_A)
+            #new_score = cache.local_score(y, aux | {x})
             print("        new: s(%d, %s) = %0.6f old: s(%d, %s) = %0.6f" %
                   (y, aux | {x}, new_score, y, aux, old_score)) if debug > 1 else None
             # Add to the list of valid operators
@@ -636,8 +638,10 @@ def score_valid_delete_operators(x, y, A, cache, debug=0):
             # Compute the change in score
             aux = (na_yx - set(H)) | utils.pa(y, A) | {x}
             # print(x,y,H,"na_yx:",na_yx,"old:",aux,"new:", aux - {x})
-            old_score = cache.local_score(y, aux)
-            new_score = cache.local_score(y, aux - {x})
+            #old_score = cache.local_score(y, aux)
+            #new_score = cache.local_score(y, aux - {x})
+            old_score = cache.full_score(A)
+            new_score = cache.full_score(new_A)
             print("        new: s(%d, %s) = %0.6f old: s(%d, %s) = %0.6f" %
                   (y, aux - {x}, new_score, y, aux, old_score)) if debug > 1 else None
             # Add to the list of valid operators
@@ -818,10 +822,12 @@ def score_valid_turn_operators_dir(x, y, A, cache, debug=0):
             # Apply operator
             new_A = turn(x, y, C, A)
             # Compute the change in score
-            new_score = cache.local_score(y, utils.pa(
-                y, A) | C | {x}) + cache.local_score(x, utils.pa(x, A) - {y})
-            old_score = cache.local_score(y, utils.pa(y, A) | C) + \
-                cache.local_score(x, utils.pa(x, A))
+            #new_score = cache.local_score(y, utils.pa(
+            #    y, A) | C | {x}) + cache.local_score(x, utils.pa(x, A) - {y})
+            #old_score = cache.local_score(y, utils.pa(y, A) | C) + \
+            #    cache.local_score(x, utils.pa(x, A))
+            old_score = cache.full_score(A)
+            new_score = cache.full_score(new_A)
             print("        new score = %0.6f, old score = %0.6f, y=%d, C=%s" %
                   (new_score, old_score, y, C)) if debug > 1 else None
             # Add to the list of valid operators
@@ -916,10 +922,12 @@ def score_valid_turn_operators_undir(x, y, A, cache, debug=0):
         #   Apply operator
         new_A = turn(x, y, C, A)
         #   Compute the change in score
-        new_score = cache.local_score(y, utils.pa(
-            y, A) | C | {x}) + cache.local_score(x, utils.pa(x, A) | (C & na_yx))
-        old_score = cache.local_score(y, utils.pa(y, A) | C) + \
-            cache.local_score(x, utils.pa(x, A) | (C & na_yx) | {y})
+        #new_score = cache.local_score(y, utils.pa(
+        #    y, A) | C | {x}) + cache.local_score(x, utils.pa(x, A) | (C & na_yx))
+        #old_score = cache.local_score(y, utils.pa(y, A) | C) + \
+        #    cache.local_score(x, utils.pa(x, A) | (C & na_yx) | {y})
+        old_score = cache.full_score(A)
+        new_score = cache.full_score(new_A)
         print("        new score = %0.6f, old score = %0.6f, y=%d, C=%s" %
               (new_score, old_score, y, C)) if debug > 1 else None
         #   Add to the list of valid operators

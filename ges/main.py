@@ -207,8 +207,13 @@ def fit(score_class, completion_algorithm=None, A0=None, phases=['forward', 'bac
             while True:
                 score_change, new_A = fun(A, score_class, max(0, debug - 1))
                 if score_change > 1e-6:
-                    A = completion_algorithm(new_A)
+#                    A = completion_algorithm(new_A)
+                    A = new_A
                     total_score += score_change
+                    print(phase)
+                    print(A)
+                    print(total_score)
+                    print("="*10)
                 else:
                     break
             print("-----------------------") if debug else None
@@ -261,7 +266,7 @@ def forward_step(A, cache, debug=0):
         return 0, A
     else:
         scores = [op[0] for op in valid_operators]
-        score, new_A, x, y, T = valid_operators[np.argmax(scores)]
+        score, new_A, x, y, T = valid_operators[np.argmin(scores)]
         print("  Best operator: insert(%d, %d, %s) -> (%0.4f)" %
               (x, y, T, score)) if debug else None
         return score, new_A
@@ -314,7 +319,7 @@ def backward_step(A, cache, debug=0):
         return 0, A
     else:
         scores = [op[0] for op in valid_operators]
-        score, new_A, x, y, H = valid_operators[np.argmax(scores)]
+        score, new_A, x, y, H = valid_operators[np.argmin(scores)]
         print("  Best operator: delete(%d, %d, %s) -> (%0.4f)" %
               (x, y, H, score)) if debug else None
         return score, new_A
@@ -363,7 +368,7 @@ def turning_step(A, cache, debug=0):
         return 0, A
     else:
         scores = [op[0] for op in valid_operators]
-        score, new_A, x, y, C = valid_operators[np.argmax(scores)]
+        score, new_A, x, y, C = valid_operators[np.argmin(scores)]
         print("  Best operator: turn(%d, %d, %s) -> (%0.4f)" % (x, y, C, score)) if debug else None
         return score, new_A
 

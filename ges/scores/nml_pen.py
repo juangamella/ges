@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import math 
 from sklearn.preprocessing import LabelEncoder
 from collections import Counter, defaultdict
 import itertools
@@ -45,17 +46,17 @@ class NmlPen(DecomposableScore):
         """ Given a node and its parents, return nml-penalized log-likelihood
         of a sample from a single environment
         """
-        pa = list(pa)
-        if len(pa):
+
+        if len(pa) > 0:
             return self._endogenous_score(x, pa)
         else:
             return self._exogenous_score(x)
 
     def _endogenous_score(self, x, pa):
         pa = list(pa)
-        x_data = self.data[:, x]
+        x_data = np.squeeze(self.data[:, x])
         le_ = LabelEncoder()
-        pa_data = np.array(["".join(str(row)) for row in self.data[:, pa]])
+        pa_data = np.squeeze(np.array(["".join(str(row)) for row in self.data[:, pa]]))
         pa_data = le_.fit_transform(pa_data)
 
         # Compute log-likelihood
@@ -63,17 +64,22 @@ class NmlPen(DecomposableScore):
         f = update_regression(pa_data, x_data, f)
         likelihood = cause_effect_negloglikelihood(pa_data, x_data, f)
         # Compute penalty term
-        nml_term = (len(set(pa_data)) - 1) * np.log(len(set(x_data)))
+        nml_term = (len(set(pa_data)) - 1) * log2(len(set(x_data)))
         score = likelihood + nml_term
         return score
 
     def _exogenous_score(self, x):
+        # Compute log-likelihood
         likelihood = 0
-        x_data = self.data[:, x]
+        x_data = np.squeeze(self.data[:, x])
         x_freqs = Counter(x_data)
         for freq in x_freqs.values():
-            likelihood += freq * (np.log(self.n) - np.log(freq))
+            likelihood += freq * (log2(self.n) - log2(freq))
         return likelihood
+
+
+def log2(n):
+    return math.log(n or 1, 2)
 
 def stratify(X, Y):
     """Stratifies Y based on unique values of X.
@@ -122,7 +128,7 @@ def update_regression(C, E, f, max_niterations=100):
     cur_likelihood = 0
     res = [(e - f[c]) % mod_E for c, e in zip(C, E)]
     for freq in Counter(res).values():
-        cur_likelihood += freq * (np.log(n) - np.log(freq))
+        cur_likelihood += freq * (log2(n) - log2(freq))
 
     j = 0
     minimized = True
@@ -144,7 +150,7 @@ def update_regression(C, E, f, max_niterations=100):
                 neglikelihood = 0
                 res = [(e - f_[c]) % mod_E for c, e in zip(C, E)]
                 for freq in Counter(res).values():
-                    neglikelihood += freq * (np.log(n) - np.log(freq))
+                    neglikelihood += freq * (log2(n) - log2(freq))
 
                 if neglikelihood < best_likelihood:
                     best_likelihood = neglikelihood
@@ -191,6 +197,7 @@ def cause_effect_negloglikelihood(C, E, func):
             for c in supp_C:
                 if (func[c] + e_E) % mod_E == e:
                     freq += pair_cnt[c][e]
-        loglikelihood += freq * (np.log(n) - np.log(freq))
+        loglikelihood += freq * (log2(n) - log2(freq))
 
     return loglikelihood
+

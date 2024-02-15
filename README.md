@@ -1,5 +1,9 @@
 # Greedy Equivalence Search (GES) Algorithm for Causal Discovery
 
+[![PyPI version](https://badge.fury.io/py/ges.svg)](https://badge.fury.io/py/ges)
+[![Downloads](https://static.pepy.tech/badge/ges)](https://pepy.tech/project/ges)
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+
 This is a python implementation of the GES algorithm from the paper [*"Optimal Structure Identification With Greedy Search"*](https://www.jmlr.org/papers/volume3/chickering02b/chickering02b.pdf) by David Maxwell Chickering. It includes the additional turning phase described in [Hauser & Bühlmann (2012)](https://www.jmlr.org/papers/volume13/hauser12a/hauser12a.pdf).
 
 ## Installation

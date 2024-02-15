@@ -1,3 +1,20 @@
+v1.1.0, 2022-06-15
+  - Fixed bug: The calls ges.fit and ges.fit_bic now return the total score, instead of the total score change wrt. the empty graph.
+  - Set a minimum value (float machine epsilon) for the estimated noise term variances. For very low sample sizes noise-term variances can be estimated as zero because of machine precision, breaking the logarithm in the likelihood computation.
+  - When checking if an operator improved the score, require it to be greater than a threshold (instead of zero); because of numerical issues, two opposing turn operators (idemptotent when applied together) may both return a score slightly over-zero; as a result the algorithm gets stuck in a loop.
+v1.0.6, 2021-11-03
+  - Updated MANIFEST.in file to include readme and license.
+v1.0.5, 2021-11-03
+  - ges.fit now allows for an optional parameter `completion_algorithm` which allows for a user-defined algorithm to go from PDAG to CPDAG after the application of each operator.
+  - removed deprecated use of np.bool
+v1.0.4, 2021-06-03
+  - Both ges.fit and ges.fit_bic now allow for an optional parameter `iterate`, to indicate whether the given phases should be iterated more than once. Defaults to `False` to maintain backwards compatibility.
+  - Adapted tests.
+v1.0.3, 2021-05-21
+  - Fixed bug in "raw" computation of Gaussian observational score + expanded tests
+  - Ran autopep on all files, removed unused imports, etc.
+  - Expanded docstrings and doctests.
+  - Changed ges.py to main.py to avoid module/package name conflict.
 v1.0.2, 2021-02-05 -- Adapted testing code to new sempler version 0.2.0.
 v1.0.1, 2021-01-24 -- Fixed project url and license on setup.py, added changelog.
 v1.0.0, 2021-01-24 -- Initial release.

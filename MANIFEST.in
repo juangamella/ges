@@ -1,2 +1,4 @@
 include *.txt
 recursive-include docs *.txt
+include README_pypi.md
+include LICENSE.txt

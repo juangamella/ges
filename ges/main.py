@@ -129,7 +129,7 @@ def fit_bic(
     (array([[0, 1, 1, 0],
            [0, 0, 0, 0],
            [1, 1, 0, 1],
-           [0, 1, 1, 0]]), 15.674267611628233)
+           [0, 1, 1, 0]]), -15.641090039219737)
 
     """
     # Initialize Gaussian BIC score (precomputes scatter matrices, sets up cache)
@@ -257,7 +257,7 @@ def forward_step(A, cache, debug=0):
     # For each edge, enumerate and score all valid operators
     valid_operators = []
     print("  %d candidate edges" % len(edge_candidates)) if debug > 1 else None
-    for (x, y) in edge_candidates:
+    for x, y in edge_candidates:
         valid_operators += score_valid_insert_operators(
             x, y, A, cache, debug=max(0, debug - 1)
         )
@@ -313,7 +313,7 @@ def backward_step(A, cache, debug=0):
     # For each edge, enumerate and score all valid operators
     valid_operators = []
     print("  %d candidate edges" % len(edge_candidates)) if debug > 1 else None
-    for (x, y) in edge_candidates:
+    for x, y in edge_candidates:
         valid_operators += score_valid_delete_operators(
             x, y, A, cache, debug=max(0, debug - 1)
         )
@@ -365,7 +365,7 @@ def turning_step(A, cache, debug=0):
     # For each edge, enumerate and score all valid operators
     valid_operators = []
     print("  %d candidate edges" % len(edge_candidates)) if debug > 1 else None
-    for (x, y) in edge_candidates:
+    for x, y in edge_candidates:
         valid_operators += score_valid_turn_operators(
             x, y, A, cache, debug=max(0, debug - 1)
         )

@@ -1,5 +1,6 @@
-v1.1.1, ????-??-??
+v1.1.1, 2025-03-03
   - Fixed README (i.e. ges.main vs. ges.ges) and documented `iterate` parameter.
+  - Replaced calls to np.Inf by np.inf to ensure compatibility with numpy>=2
 v1.1.0, 2022-06-15
   - Fixed bug: The calls ges.fit and ges.fit_bic now return the total score, instead of the total score change wrt. the empty graph.
   - Set a minimum value (float machine epsilon) for the estimated noise term variances. For very low sample sizes noise-term variances can be estimated as zero because of machine precision, breaking the logarithm in the likelihood computation.

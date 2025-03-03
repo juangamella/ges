@@ -193,7 +193,7 @@ def fit(
     A0 = np.zeros((score_class.p, score_class.p)) if A0 is None else A0
     # GES procedure
     total_score = score_class.full_score(A0)
-    A, score_change = A0, np.Inf
+    A, score_change = A0, np.inf
     # Run each phase
     while True:
         last_total_score = total_score

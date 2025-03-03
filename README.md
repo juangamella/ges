@@ -45,6 +45,7 @@ ges.fit_bic(data, A0 = None, phases = ['forward', 'backward', 'turning'], debug 
 - **data** (np.array): the matrix containing the observations of each variable (each column corresponds to a variable).
 - **A0** (np.array, optional): the initial CPDAG on which GES will run, where where `A0[i,j] != 0` implies `i -> j` and `A[i,j] != 0 & A[j,i] != 0` implies `i - j`. Defaults to the empty graph.
 - **phases** (`[{'forward', 'backward', 'turning'}*]`, optional): this controls which phases of the GES procedure are run, and in which order. Defaults to `['forward', 'backward', 'turning']`. The turning phase was found by [Hauser & Bühlmann (2012)](https://www.jmlr.org/papers/volume13/hauser12a/hauser12a.pdf) to improve estimation performace, and is implemented here too.
+- **iterate** (boolean, default=False): Indicates whether the algorithm should repeat the given phases more than once, until the score is not improved.
 - **debug** (int, optional): if larger than 0, debug are traces printed. Higher values correspond to increased verbosity.
 
 **Returns**
@@ -100,6 +101,7 @@ You may additionally also use a custom completion algorithm , i.e. the algorithm
 - **completion_algorithm** (function, optional): the used to go from PDAG to CPDAG after the application of each operator. Must be a function which takes and returns a PDAG adjacency. If `None`, the algorithm used in the original GES paper is used.
 - **A0** (np.array, optional): the initial CPDAG on which GES will run, where where `A0[i,j] != 0` implies `i -> j` and `A[i,j] != 0 & A[j,i] != 0` implies `i - j`. Defaults to the empty graph.
 - **phases** (`[{'forward', 'backward', 'turning'}*]`, optional): this controls which phases of the GES procedure are run, and in which order. Defaults to `['forward', 'backward', 'turning']`. The turning phase was found by [Hauser & Bühlmann (2012)](https://www.jmlr.org/papers/volume13/hauser12a/hauser12a.pdf) to improve estimation performace, and is implemented here too.
+- **iterate** (boolean, default=False): Indicates whether the algorithm should repeat the given phases more than once, until the score is not improved.
 - **debug** (int, optional): if larger than 0, debug are traces printed. Higher values correspond to increased verbosity.
 
 **Returns**
@@ -145,7 +147,7 @@ print(estimate, score)
 
 All the modules can be found inside the `ges/` directory. These include:
 
-  - `ges.ges` which is the main module with the calls to start GES, and contains the implementation of the insert, delete and turn operators.
+  - `ges.main` which is the main module with the calls to start GES, and contains the implementation of the insert, delete and turn operators.
   - `ges.utils` contains auxiliary functions and the logic to transform a PDAG into a CPDAG, used after each application of an operator.
   - `ges.scores` contains the modules with the score classes:
       - `ges.scores.decomposable_score` contains the base class for decomposable score classes (see that module for more details).
